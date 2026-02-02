@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Menu...</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #D4A574;
+            --secondary: #8B7355;
+            --accent: #F5E6D3;
+            --background: #FAF7F2;
+            --text: #4A4A4A;
+            --white: #FFFFFF;
+            --shadow: rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* Loading State */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--accent);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+        
+        /* Error State */
+        .error-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .error-container h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .error-container p {
+            color: #888;
+            margin-bottom: 2rem;
+        }
+        
+        .error-btn {
+            padding: 0.75rem 2rem;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 25px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .error-btn:hover {
+            background: var(--secondary);
+        }
+        
+        /* Menu Container */
+        .menu-container {
+            display: none;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 2rem 1rem;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--white);
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo-placeholder {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2.5rem;
+            color: var(--primary);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cafe-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tagline {
+            font-size: 1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Contact Bar */
+        .contact-bar {
+            background: var(--white);
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .contact-item:hover {
+            color: var(--primary);
+        }
+        
+        .contact-item svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--primary);
+        }
+        
+        /* Categories Navigation */
+        .categories-nav {
+            background: var(--white);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px var(--shadow);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .categories-nav::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .nav-container {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-start;
+            min-width: max-content;
+            padding: 0 0.5rem;
+        }
+        
+        .category-btn {
+            padding: 0.6rem 1.2rem;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .category-btn:hover,
+        .category-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        /* Menu Content */
+        .menu-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        /* Category Section */
+        .category-section {
+            margin-bottom: 2rem;
+        }
+        
+        .category-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .category-icon {
+            font-size: 1.5rem;
+        }
+        
+        .category-description {
+            color: #666;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        /* Menu Items */
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .menu-item {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            box-shadow: 0 2px 10px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+        
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        .item-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 2rem;
+        }
+        
+        .item-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text);
+        }
+        
+        .item-badges {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+            margin-top: 0.25rem;
+        }
+        
+        .badge {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .badge-bestseller {
+            background: #FFD700;
+            color: #333;
+        }
+        
+        .badge-new {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .badge-vegan {
+            background: #8BC34A;
+            color: white;
+        }
+        
+        .badge-vegetarian {
+            background: #AED581;
+            color: #333;
+        }
+        
+        .badge-spicy {
+            background: #FF5722;
+            color: white;
+        }
+        
+        .badge-gf {
+            background: #FFC107;
+            color: #333;
+        }
+        
+        .item-price {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+            white-space: nowrap;
+        }
+        
+        .original-price {
+            font-size: 0.85rem;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 0.5rem;
+        }
+        
+        .item-description {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .item-meta {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #888;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--secondary);
+            color: var(--white);
+            padding: 2rem 1rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .footer-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-address {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .social-link:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .social-link svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--white);
+        }
+        
+        .powered-by {
+            margin-top: 1.5rem;
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+        
+        .powered-by a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #888;
+        }
+        
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            .header {
+                padding: 3rem 2rem;
+            }
+            
+            .cafe-name {
+                font-size: 2.5rem;
+            }
+            
+            .menu-item {
+                padding: 1.25rem;
+            }
+            
+            .item-image,
+            .item-placeholder {
+                width: 100px;
+                height: 100px;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .menu-item {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+        
+        .menu-item:nth-child(1) { animation-delay: 0.05s; }
+        .menu-item:nth-child(2) { animation-delay: 0.1s; }
+        .menu-item:nth-child(3) { animation-delay: 0.15s; }
+        .menu-item:nth-child(4) { animation-delay: 0.2s; }
+        .menu-item:nth-child(5) { animation-delay: 0.25s; }
+        .menu-item:nth-child(6) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <!-- Loading State -->
+    <div class="loading-container" id="loadingState">
+        <div class="loader"></div>
+        <div class="loading-text">Loading menu...</div>
+    </div>
+    
+    <!-- Error State -->
+    <div class="error-container" id="errorState">
+        <div class="error-icon">😕</div>
+        <h1>Menu Not Found</h1>
+        <p id="errorMessage">The menu you're looking for doesn't exist or has been removed.</p>
+        <button class="error-btn" onclick="window.location.href='/'">Go Home</button>
+    </div>
+    
+    <!-- Menu Container -->
+    <div class="menu-container" id="menuContainer">
+        <!-- Header -->
+        <header class="header" id="header">
+            <div class="logo-placeholder" id="logoContainer">☕</div>
+            <h1 class="cafe-name" id="cafeName">Loading...</h1>
+            <p class="tagline" id="tagline"></p>
+        </header>
+        
+        <!-- Contact Bar -->
+        <div class="contact-bar" id="contactBar" style="display: none;"></div>
+        
+        <!-- Categories Navigation -->
+        <nav class="categories-nav" id="categoriesNav" style="display: none;">
+            <div class="nav-container" id="navContainer"></div>
+        </nav>
+        
+        <!-- Menu Content -->
+        <main class="menu-content" id="menuContent"></main>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-name" id="footerName"></div>
+                <div class="footer-address" id="footerAddress"></div>
+                <div class="social-links" id="socialLinks"></div>
+                <p class="powered-by">Powered by <a href="/">QR Menu System</a></p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const API_BASE = '/api/public';
+        let menuData = null;
+        
+        // Get slug from URL
+        function getSlug() {
+            const path = window.location.pathname;
+            const match = path.match(/\/menu\/([^\/]+)/);
+            return match ? match[1] : null;
+        }
+        
+        // Check if preview mode (from dashboard iframe)
+        function isPreviewMode() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('preview') === 'true';
+        }
+        
+        // Load menu
+        async function loadMenu() {
+            const slug = getSlug();
+            
+            if (!slug) {
+                showError('Invalid menu URL');
+                return;
+            }
+            
+            try {
+                // Add preview param if in preview mode
+                const previewParam = isPreviewMode() ? '?preview=true' : '';
+                const response = await fetch(`${API_BASE}/menu/${slug}${previewParam}`);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showError('This menu doesn\'t exist or hasn\'t been published yet.');
+                    } else {
+                        showError('Failed to load menu. Please try again later.');
+                    }
+                    return;
+                }
+                
+                menuData = await response.json();
+                renderMenu();
+                
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                showError('Failed to load menu. Please try again later.');
+            }
+        }
+        
+        // Show error
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('menuContainer').style.display = 'none';
+            document.getElementById('errorState').style.display = 'flex';
+            document.getElementById('errorMessage').textContent = message;
+        }
+        
+        // Render menu
+        function renderMenu() {
+            const cafe = menuData.cafe;
+            const categories = menuData.categories;
+            
+            // Update page title
+            document.title = `${cafe.name} - Menu`;
+            
+            // Apply theme colors
+            if (cafe.theme) {
+                const root = document.documentElement;
+                if (cafe.theme.primaryColor) root.style.setProperty('--primary', cafe.theme.primaryColor);
+                if (cafe.theme.secondaryColor) root.style.setProperty('--secondary', cafe.theme.secondaryColor);
+                if (cafe.theme.accentColor) root.style.setProperty('--accent', cafe.theme.accentColor);
+                if (cafe.theme.backgroundColor) root.style.setProperty('--background', cafe.theme.backgroundColor);
+                if (cafe.theme.textColor) root.style.setProperty('--text', cafe.theme.textColor);
+            }
+            
+            // Render header
+            renderHeader(cafe);
+            
+            // Render contact bar
+            renderContactBar(cafe);
+            
+            // Render categories nav
+            renderCategoriesNav(categories);
+            
+            // Render menu content
+            renderMenuContent(categories, cafe.currency || '$');
+            
+            // Render footer
+            renderFooter(cafe);
+            
+            // Show menu, hide loading
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('menuContainer').style.display = 'block';
+        }
+        
+        // Render header
+        function renderHeader(cafe) {
+            const logoContainer = document.getElementById('logoContainer');
+            
+            if (cafe.logo) {
+                logoContainer.outerHTML = `<img src="${cafe.logo}" alt="${escapeHtml(cafe.name)}" class="logo" id="logoContainer">`;
+            }
+            
+            document.getElementById('cafeName').textContent = cafe.name;
+            
+            if (cafe.tagline) {
+                document.getElementById('tagline').textContent = cafe.tagline;
+                document.getElementById('tagline').style.display = 'block';
+            } else {
+                document.getElementById('tagline').style.display = 'none';
+            }
+        }
+        
+        // Render contact bar
+        function renderContactBar(cafe) {
+            const contacts = [];
+            
+            if (cafe.contact?.phone) {
+                contacts.push(`
+                    <a href="tel:${cafe.contact.phone}" class="contact-item">
+                        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                        ${escapeHtml(cafe.contact.phone)}
+                    </a>
+                `);
+            }
+            
+            if (cafe.contact?.email) {
+                contacts.push(`
+                    <a href="mailto:${cafe.contact.email}" class="contact-item">
+                        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                        Email Us
+                    </a>
+                `);
+            }
+            
+            if (cafe.contact?.website) {
+                contacts.push(`
+                    <a href="${cafe.contact.website}" target="_blank" class="contact-item">
+                        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></svg>
+                        Website
+                    </a>
+                `);
+            }
+            
+            const contactBar = document.getElementById('contactBar');
+            if (contacts.length > 0) {
+                contactBar.innerHTML = contacts.join('');
+                contactBar.style.display = 'flex';
+            }
+        }
+        
+        // Render categories nav
+        function renderCategoriesNav(categories) {
+            if (categories.length === 0) return;
+            
+            const navContainer = document.getElementById('navContainer');
+            navContainer.innerHTML = categories.map((cat, idx) => `
+                <button class="category-btn${idx === 0 ? ' active' : ''}" data-category="${cat.id}">
+                    ${cat.icon || ''} ${escapeHtml(cat.name)}
+                </button>
+            `).join('');
+            
+            document.getElementById('categoriesNav').style.display = 'block';
+            
+            // Add click handlers
+            navContainer.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active button
+                    navContainer.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Scroll to category
+                    const categoryId = btn.dataset.category;
+                    const section = document.getElementById(`category-${categoryId}`);
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+        }
+        
+        // Render menu content
+        function renderMenuContent(categories, currency) {
+            const menuContent = document.getElementById('menuContent');
+            
+            if (categories.length === 0) {
+                menuContent.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Menu Coming Soon</h3>
+                        <p>Our delicious menu is being prepared. Check back soon!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            menuContent.innerHTML = categories.map(cat => `
+                <section class="category-section" id="category-${cat.id}">
+                    <h2 class="category-title">
+                        ${cat.icon ? `<span class="category-icon">${cat.icon}</span>` : ''}
+                        ${escapeHtml(cat.name)}
+                    </h2>
+                    ${cat.description ? `<p class="category-description">${escapeHtml(cat.description)}</p>` : ''}
+                    <div class="menu-items">
+                        ${cat.items && cat.items.length > 0 
+                            ? cat.items.map(item => renderItem(item, currency)).join('') 
+                            : '<div class="empty-state"><p>No items in this category yet.</p></div>'
+                        }
+                    </div>
+                </section>
+            `).join('');
+            
+            // Setup scroll observer for category highlighting
+            setupScrollObserver();
+        }
+        
+        // Render item
+        function renderItem(item, currency) {
+            const badges = [];
+            if (item.is_bestseller) badges.push('<span class="badge badge-bestseller">⭐ Bestseller</span>');
+            if (item.is_new) badges.push('<span class="badge badge-new">🆕 New</span>');
+            if (item.is_vegan) badges.push('<span class="badge badge-vegan">🌱 Vegan</span>');
+            if (item.is_vegetarian) badges.push('<span class="badge badge-vegetarian">🥬 Vegetarian</span>');
+            if (item.is_spicy) badges.push('<span class="badge badge-spicy">🌶️ Spicy</span>');
+            if (item.is_gluten_free) badges.push('<span class="badge badge-gf">GF</span>');
+            
+            return `
+                <div class="menu-item">
+                    ${item.image 
+                        ? `<img src="${item.image}" alt="${escapeHtml(item.name)}" class="item-image" onerror="this.outerHTML='<div class=\\'item-placeholder\\'>🍽️</div>'">`
+                        : '<div class="item-placeholder">🍽️</div>'
+                    }
+                    <div class="item-content">
+                        <div class="item-header">
+                            <div>
+                                <div class="item-name">${escapeHtml(item.name)}</div>
+                                ${badges.length > 0 ? `<div class="item-badges">${badges.join('')}</div>` : ''}
+                            </div>
+                            <div class="item-price">
+                                ${currency}${parseFloat(item.price).toFixed(2)}
+                                ${item.original_price ? `<span class="original-price">${currency}${parseFloat(item.original_price).toFixed(2)}</span>` : ''}
+                            </div>
+                        </div>
+                        ${item.description ? `<p class="item-description">${escapeHtml(item.description)}</p>` : ''}
+                        ${item.calories ? `<p class="item-meta">${item.calories} cal</p>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Render footer
+        function renderFooter(cafe) {
+            document.getElementById('footerName').textContent = cafe.name;
+            
+            if (cafe.contact?.address) {
+                document.getElementById('footerAddress').textContent = cafe.contact.address;
+            }
+            
+            const socialLinks = [];
+            
+            if (cafe.social?.instagram) {
+                socialLinks.push(`
+                    <a href="https://instagram.com/${cafe.social.instagram}" target="_blank" class="social-link" title="Instagram">
+                        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                `);
+            }
+            
+            if (cafe.social?.facebook) {
+                socialLinks.push(`
+                    <a href="https://facebook.com/${cafe.social.facebook}" target="_blank" class="social-link" title="Facebook">
+                        <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+                `);
+            }
+            
+            if (socialLinks.length > 0) {
+                document.getElementById('socialLinks').innerHTML = socialLinks.join('');
+            }
+        }
+        
+        // Setup scroll observer
+        function setupScrollObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const categoryId = entry.target.id.replace('category-', '');
+                        document.querySelectorAll('.category-btn').forEach(btn => {
+                            btn.classList.toggle('active', btn.dataset.category === categoryId);
+                        });
+                    }
+                });
+            }, { threshold: 0.3 });
+            
+            document.querySelectorAll('.category-section').forEach(section => {
+                observer.observe(section);
+            });
+        }
+        
+        // Escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Initialize
+        loadMenu();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard - QR Menu System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f7fb;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: linear-gradient(180deg, #D4A574 0%, #8B7355 100%);
+            color: white;
+            padding: 1.5rem;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-logo {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .sidebar-subtitle {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            margin-bottom: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 0.25rem;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        
+        .nav-item span {
+            font-size: 0.9rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 1.5rem;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        .header-title p {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #D4A574 0%, #8B7355 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            text-align: right;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        .user-role {
+            font-size: 0.75rem;
+            color: #888;
+        }
+        
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h2 {
+            font-size: 1.1rem;
+            color: #333;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Button */
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #D4A574 0%, #8B7355 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 165, 116, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #eee;
+        }
+        
+        .btn-danger {
+            background: #ff5252;
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        
+        .btn-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* Form */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #D4A574;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        /* Category */
+        .category-section {
+            margin-bottom: 2rem;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f8f8 0%, #f0f0f0 100%);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+        
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .category-icon {
+            font-size: 1.5rem;
+        }
+        
+        .category-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .category-count {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        
+        .category-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        /* Menu Item */
+        .menu-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .menu-item-card {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .menu-item-card:hover {
+            border-color: #D4A574;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .menu-item-card.unavailable {
+            opacity: 0.6;
+        }
+        
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        .item-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 2rem;
+        }
+        
+        .item-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #333;
+        }
+        
+        .item-price {
+            font-weight: 600;
+            color: #D4A574;
+            font-size: 1.1rem;
+        }
+        
+        .item-description {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .item-badges {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .badge-bestseller { background: #FFD700; color: #333; }
+        .badge-new { background: #4CAF50; color: white; }
+        .badge-vegan { background: #8BC34A; color: white; }
+        .badge-spicy { background: #FF5722; color: white; }
+        
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .item-toggle {
+            font-size: 0.8rem;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+        
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ccc;
+            border-radius: 24px;
+            transition: 0.3s;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        
+        .toggle input:checked + .toggle-slider {
+            background: #4CAF50;
+        }
+        
+        .toggle input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+        
+        .modal-overlay.show .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.25rem;
+            color: #333;
+        }
+        
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            background: #eee;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: rgba(212, 165, 116, 0.1);
+        }
+        
+        .stat-content h3 {
+            font-size: 1.75rem;
+            color: #333;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-content p {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        
+        /* QR Section */
+        .qr-section {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .qr-image {
+            max-width: 250px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .menu-url {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 10px;
+            font-family: monospace;
+            word-break: break-all;
+            margin-bottom: 1rem;
+        }
+        
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 3000;
+        }
+        
+        .toast {
+            background: #333;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .toast.success { background: #4caf50; }
+        .toast.error { background: #f44336; }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #eee;
+            border-top-color: #D4A574;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+        
+        /* Sections */
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        /* No Cafe State */
+        .no-cafe-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .no-cafe-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1.5rem;
+            opacity: 0.4;
+        }
+        
+        .no-cafe-state h2 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .no-cafe-state p {
+            color: #888;
+            margin-bottom: 2rem;
+        }
+        
+        /* Checkbox Group */
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .checkbox-item input {
+            width: 18px;
+            height: 18px;
+            accent-color: #D4A574;
+        }
+        
+        .checkbox-item label {
+            font-size: 0.85rem;
+            color: #555;
+            cursor: pointer;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .menu-items-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">☕</div>
+            <div>
+                <div class="sidebar-title" id="cafeName">My Café</div>
+                <div class="sidebar-subtitle">Owner Dashboard</div>
+            </div>
+        </div>
+        
+        <nav>
+            <div class="nav-section">
+                <div class="nav-section-title">Menu</div>
+                <a href="#" class="nav-item active" data-section="menu">
+                    <svg viewBox="0 0 24 24"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>
+                    <span>Menu Items</span>
+                </a>
+                <a href="#" class="nav-item" data-section="categories">
+                    <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+                    <span>Categories</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Tools</div>
+                <a href="#" class="nav-item" data-section="qrcode">
+                    <svg viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2zM17 17h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>
+                    <span>QR Code</span>
+                </a>
+                <a href="#" class="nav-item" data-section="preview">
+                    <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                    <span>Menu Preview</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                    <span>Settings</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Account</div>
+                <a href="#" class="nav-item" onclick="showChangePassword()">
+                    <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                    <span>Change Password</span>
+                </a>
+                <a href="#" class="nav-item" onclick="logout()">
+                    <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <h1 id="pageTitle">Menu Items</h1>
+                <p id="pageSubtitle">Manage your café menu</p>
+            </div>
+            <div class="user-menu">
+                <div class="user-info">
+                    <div class="user-name" id="userName">Owner</div>
+                    <div class="user-role">Café Owner</div>
+                </div>
+                <div class="user-avatar" id="userAvatar">O</div>
+            </div>
+        </header>
+        
+        <!-- No Cafe State -->
+        <div id="noCafeState" class="no-cafe-state" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="#ccc"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>
+            <h2>No Café Assigned</h2>
+            <p>Contact your administrator to get a café assigned to your account.</p>
+        </div>
+        
+        <!-- Menu Section -->
+        <section id="menuSection" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📂</div>
+                    <div class="stat-content">
+                        <h3 id="totalCategories">0</h3>
+                        <p>Categories</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🍽️</div>
+                    <div class="stat-content">
+                        <h3 id="totalItems">0</h3>
+                        <p>Menu Items</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3 id="availableItems">0</h3>
+                        <p>Available</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2>Menu Items</h2>
+                    <button class="btn btn-primary" onclick="showAddItemModal()">+ Add Item</button>
+                </div>
+                <div class="card-body">
+                    <div id="menuContent">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Categories Section -->
+        <section id="categoriesSection" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Categories</h2>
+                    <button class="btn btn-primary" onclick="showAddCategoryModal()">+ Add Category</button>
+                </div>
+                <div class="card-body">
+                    <div id="categoriesContent">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- QR Code Section -->
+        <section id="qrcodeSection" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Your QR Code</h2>
+                </div>
+                <div class="card-body">
+                    <div class="qr-section" id="qrContent">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Menu Preview Section -->
+        <section id="previewSection" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Menu Preview</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="refreshOwnerPreview()">🔄 Refresh</button>
+                        <button class="btn btn-primary" onclick="openOwnerMenuInNewTab()">Open in New Tab</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">
+                        📱 This is how your menu will look when customers scan the QR code:
+                    </p>
+                    <div style="display: flex; justify-content: center;">
+                        <div style="width: 375px; height: 667px; border: 8px solid #333; border-radius: 30px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2); background: #fff;">
+                            <iframe id="ownerMenuPreviewFrame" style="width: 100%; height: 100%; border: none;"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Settings Section -->
+        <section id="settingsSection" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Café Settings</h2>
+                </div>
+                <div class="card-body">
+                    <form id="settingsForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Café Name</label>
+                                <input type="text" id="settingName">
+                            </div>
+                            <div class="form-group">
+                                <label>Tagline</label>
+                                <input type="text" id="settingTagline" placeholder="Best coffee in town">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="settingDescription" rows="3" placeholder="Tell customers about your café..."></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" id="settingPhone">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="settingEmail">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" id="settingAddress">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Currency Symbol</label>
+                                <input type="text" id="settingCurrency" placeholder="$" maxlength="3">
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="settingStatus">
+                                    <option value="0">Draft (Not visible)</option>
+                                    <option value="1">Published</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Add Category Modal -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="categoryModalTitle">Add Category</h2>
+                <button class="modal-close" onclick="closeModal('categoryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryId">
+                    <div class="form-group">
+                        <label>Category Name *</label>
+                        <input type="text" id="categoryName" placeholder="e.g., Hot Drinks" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Icon (Emoji)</label>
+                        <input type="text" id="categoryIcon" placeholder="☕" maxlength="4">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="categoryDescription" rows="2" placeholder="Optional description..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('categoryModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCategory()">Save Category</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Item Modal -->
+    <div class="modal-overlay" id="itemModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 id="itemModalTitle">Add Menu Item</h2>
+                <button class="modal-close" onclick="closeModal('itemModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="itemForm">
+                    <input type="hidden" id="itemId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Item Name *</label>
+                            <input type="text" id="itemName" placeholder="e.g., Cappuccino" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Category *</label>
+                            <select id="itemCategory" required>
+                                <option value="">Select category</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="itemDescription" rows="2" placeholder="Describe this item..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Price *</label>
+                            <input type="number" id="itemPrice" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Original Price (for discounts)</label>
+                            <input type="number" id="itemOriginalPrice" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input type="url" id="itemImage" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>Calories</label>
+                        <input type="number" id="itemCalories" min="0" placeholder="e.g., 150">
+                    </div>
+                    <div class="form-group">
+                        <label>Dietary & Tags</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="itemVegan">
+                                <label for="itemVegan">🌱 Vegan</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="itemVegetarian">
+                                <label for="itemVegetarian">🥬 Vegetarian</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="itemGlutenFree">
+                                <label for="itemGlutenFree">🌾 Gluten-Free</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="itemSpicy">
+                                <label for="itemSpicy">🌶️ Spicy</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="itemBestseller">
+                                <label for="itemBestseller">⭐ Bestseller</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="itemNew">
+                                <label for="itemNew">🆕 New</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('itemModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button class="modal-close" onclick="closeModal('passwordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="newPassword" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('passwordModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        const API_BASE = '/api';
+        let currentUser = null;
+        let cafeData = null;
+        let categories = [];
+        let menuItems = [];
+        let currentSection = 'menu';
+        
+        // Check authentication
+        async function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                currentUser = JSON.parse(user);
+                
+                // Verify token
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Invalid token');
+                }
+                
+                const data = await response.json();
+                
+                // Redirect admin to admin dashboard
+                if (data.user.role === 'admin') {
+                    window.location.href = '/admin/dashboard.html';
+                    return;
+                }
+                
+                currentUser = data.user;
+                updateUserDisplay();
+                
+                // Check if user has a cafe
+                if (currentUser.cafe_id) {
+                    await loadCafeData();
+                } else {
+                    showNoCafeState();
+                }
+                
+            } catch (error) {
+                console.error('Auth error:', error);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Update user display
+        function updateUserDisplay() {
+            document.getElementById('userName').textContent = currentUser.name || 'Owner';
+            document.getElementById('userAvatar').textContent = (currentUser.name || 'O')[0].toUpperCase();
+        }
+        
+        // Show no cafe state
+        function showNoCafeState() {
+            document.getElementById('noCafeState').style.display = 'block';
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        }
+        
+        // API helper
+        async function apiRequest(endpoint, options = {}) {
+            const token = localStorage.getItem('token');
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            const response = await fetch(`${API_BASE}${endpoint}`, {
+                ...defaultOptions,
+                ...options,
+                headers: { ...defaultOptions.headers, ...options.headers }
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Request failed');
+            }
+            
+            return data;
+        }
+        
+        // Load cafe data
+        async function loadCafeData() {
+            try {
+                const data = await apiRequest(`/cafe/${currentUser.cafe_id}`);
+                cafeData = data.cafe;
+                
+                document.getElementById('cafeName').textContent = cafeData.name || 'My Café';
+                
+                await loadCategories();
+                await loadMenuItems();
+                updateStats();
+                loadSettings();
+                
+            } catch (error) {
+                console.error('Error loading cafe:', error);
+                showToast('Failed to load café data', 'error');
+            }
+        }
+        
+        // Load categories
+        async function loadCategories() {
+            try {
+                const data = await apiRequest(`/menu/${currentUser.cafe_id}/categories`);
+                categories = data.categories || [];
+                renderCategories();
+                updateCategorySelect();
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+        
+        // Load menu items
+        async function loadMenuItems() {
+            try {
+                const data = await apiRequest(`/menu/${currentUser.cafe_id}/items`);
+                menuItems = data.items || [];
+                renderMenuItems();
+            } catch (error) {
+                console.error('Error loading items:', error);
+            }
+        }
+        
+        // Update stats
+        function updateStats() {
+            document.getElementById('totalCategories').textContent = categories.length;
+            document.getElementById('totalItems').textContent = menuItems.length;
+            document.getElementById('availableItems').textContent = menuItems.filter(i => i.is_available).length;
+        }
+        
+        // Render categories
+        function renderCategories() {
+            const container = document.getElementById('categoriesContent');
+            
+            if (categories.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No categories yet</h3>
+                        <p>Create your first category to organize your menu items.</p>
+                        <button class="btn btn-primary" onclick="showAddCategoryModal()" style="margin-top: 1rem;">+ Add Category</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = categories.map(cat => `
+                <div class="category-header">
+                    <div class="category-title">
+                        <span class="category-icon">${cat.icon || '📁'}</span>
+                        <div>
+                            <div class="category-name">${escapeHtml(cat.name)}</div>
+                            <div class="category-count">${menuItems.filter(i => i.category_id === cat.id).length} items</div>
+                        </div>
+                    </div>
+                    <div class="category-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="editCategory(${cat.id})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCategory(${cat.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Render menu items
+        function renderMenuItems() {
+            const container = document.getElementById('menuContent');
+            
+            if (categories.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Create categories first</h3>
+                        <p>You need to create at least one category before adding menu items.</p>
+                        <button class="btn btn-primary" onclick="showSection('categories')" style="margin-top: 1rem;">Go to Categories</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (menuItems.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No menu items yet</h3>
+                        <p>Start building your menu by adding items.</p>
+                        <button class="btn btn-primary" onclick="showAddItemModal()" style="margin-top: 1rem;">+ Add Item</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Group items by category
+            const grouped = categories.map(cat => ({
+                ...cat,
+                items: menuItems.filter(i => i.category_id === cat.id)
+            })).filter(cat => cat.items.length > 0);
+            
+            container.innerHTML = grouped.map(cat => `
+                <div class="category-section">
+                    <div class="category-header" style="margin-bottom: 1rem;">
+                        <div class="category-title">
+                            <span class="category-icon">${cat.icon || '📁'}</span>
+                            <div>
+                                <div class="category-name">${escapeHtml(cat.name)}</div>
+                                <div class="category-count">${cat.items.length} items</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="menu-items-grid">
+                        ${cat.items.map(item => renderItemCard(item)).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Render item card
+        function renderItemCard(item) {
+            const badges = [];
+            if (item.is_bestseller) badges.push('<span class="badge badge-bestseller">⭐ Bestseller</span>');
+            if (item.is_new) badges.push('<span class="badge badge-new">🆕 New</span>');
+            if (item.is_vegan) badges.push('<span class="badge badge-vegan">🌱 Vegan</span>');
+            if (item.is_spicy) badges.push('<span class="badge badge-spicy">🌶️ Spicy</span>');
+            
+            const currency = cafeData?.currency || '$';
+            
+            return `
+                <div class="menu-item-card ${item.is_available ? '' : 'unavailable'}">
+                    ${item.image 
+                        ? `<img src="${item.image}" alt="${escapeHtml(item.name)}" class="item-image" onerror="this.outerHTML='<div class=\\'item-placeholder\\'>🍽️</div>'">`
+                        : '<div class="item-placeholder">🍽️</div>'
+                    }
+                    <div class="item-content">
+                        <div class="item-header">
+                            <div class="item-name">${escapeHtml(item.name)}</div>
+                            <div class="item-price">${currency}${parseFloat(item.price).toFixed(2)}</div>
+                        </div>
+                        ${item.description ? `<div class="item-description">${escapeHtml(item.description)}</div>` : ''}
+                        ${badges.length > 0 ? `<div class="item-badges">${badges.join('')}</div>` : ''}
+                        <div class="item-actions">
+                            <div class="item-toggle">
+                                <label class="toggle">
+                                    <input type="checkbox" ${item.is_available ? 'checked' : ''} onchange="toggleItemAvailability(${item.id}, this.checked)">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                Available
+                            </div>
+                            <div style="flex: 1;"></div>
+                            <button class="btn btn-secondary btn-sm" onclick="editItem(${item.id})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id})">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Update category select
+        function updateCategorySelect() {
+            const select = document.getElementById('itemCategory');
+            select.innerHTML = '<option value="">Select category</option>' +
+                categories.map(c => `<option value="${c.id}">${c.icon || ''} ${escapeHtml(c.name)}</option>`).join('');
+        }
+        
+        // Load settings
+        function loadSettings() {
+            if (!cafeData) return;
+            
+            document.getElementById('settingName').value = cafeData.name || '';
+            document.getElementById('settingTagline').value = cafeData.tagline || '';
+            document.getElementById('settingDescription').value = cafeData.description || '';
+            document.getElementById('settingPhone').value = cafeData.phone || '';
+            document.getElementById('settingEmail').value = cafeData.email || '';
+            document.getElementById('settingAddress').value = cafeData.address || '';
+            document.getElementById('settingCurrency').value = cafeData.currency || '$';
+            document.getElementById('settingStatus').value = cafeData.is_published ? '1' : '0';
+        }
+        
+        // Show section
+        function showSection(section) {
+            currentSection = section;
+            
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.section === section);
+            });
+            
+            // Update sections
+            document.querySelectorAll('.section').forEach(s => {
+                s.classList.remove('active');
+            });
+            document.getElementById(`${section}Section`).classList.add('active');
+            
+            // Update title
+            const titles = {
+                menu: 'Menu Items',
+                categories: 'Categories',
+                qrcode: 'QR Code',
+                preview: 'Menu Preview',
+                settings: 'Settings'
+            };
+            document.getElementById('pageTitle').textContent = titles[section] || 'Dashboard';
+            
+            // Load content based on section
+            if (section === 'qrcode') {
+                loadQRCode();
+            } else if (section === 'preview') {
+                loadOwnerPreview();
+            }
+        }
+        
+        // Preview functions
+        function loadOwnerPreview() {
+            if (!cafeData) return;
+            const iframe = document.getElementById('ownerMenuPreviewFrame');
+            if (iframe && cafeData.slug) {
+                iframe.src = `/menu/${cafeData.slug}?preview=true`;
+            }
+        }
+        
+        function refreshOwnerPreview() {
+            const iframe = document.getElementById('ownerMenuPreviewFrame');
+            if (iframe) {
+                iframe.src = iframe.src;
+                showToast('Preview refreshed!', 'success');
+            }
+        }
+        
+        function openOwnerMenuInNewTab() {
+            if (!cafeData) return;
+            window.open(`/menu/${cafeData.slug}?preview=true`, '_blank');
+        }
+        
+        // Load QR Code
+        async function loadQRCode() {
+            const container = document.getElementById('qrContent');
+            
+            if (!cafeData) {
+                container.innerHTML = '<p style="color: #888;">No café data available</p>';
+                return;
+            }
+            
+            const menuUrl = `${window.location.origin}/m/${cafeData.slug}`;
+            
+            if (cafeData.qr_code_path) {
+                container.innerHTML = `
+                    <img src="${cafeData.qr_code_path}" alt="QR Code" class="qr-image">
+                    <div class="menu-url">${menuUrl}</div>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="downloadQR()">Download QR</button>
+                        <button class="btn btn-secondary" onclick="regenerateQR()">Regenerate</button>
+                        <button class="btn btn-secondary" onclick="window.open('${menuUrl}', '_blank')">View Menu</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <p style="color: #888; margin-bottom: 1.5rem;">No QR code generated yet.</p>
+                    <button class="btn btn-primary" onclick="regenerateQR()">Generate QR Code</button>
+                `;
+            }
+        }
+        
+        // Modal functions
+        function showModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+        
+        // Category functions
+        function showAddCategoryModal() {
+            document.getElementById('categoryModalTitle').textContent = 'Add Category';
+            document.getElementById('categoryForm').reset();
+            document.getElementById('categoryId').value = '';
+            showModal('categoryModal');
+        }
+        
+        function editCategory(id) {
+            const cat = categories.find(c => c.id === id);
+            if (!cat) return;
+            
+            document.getElementById('categoryModalTitle').textContent = 'Edit Category';
+            document.getElementById('categoryId').value = cat.id;
+            document.getElementById('categoryName').value = cat.name || '';
+            document.getElementById('categoryIcon').value = cat.icon || '';
+            document.getElementById('categoryDescription').value = cat.description || '';
+            showModal('categoryModal');
+        }
+        
+        async function saveCategory() {
+            try {
+                const id = document.getElementById('categoryId').value;
+                const data = {
+                    name: document.getElementById('categoryName').value,
+                    icon: document.getElementById('categoryIcon').value,
+                    description: document.getElementById('categoryDescription').value
+                };
+                
+                if (!data.name) {
+                    throw new Error('Category name is required');
+                }
+                
+                if (id) {
+                    await apiRequest(`/menu/${currentUser.cafe_id}/categories/${id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(data)
+                    });
+                    showToast('Category updated!', 'success');
+                } else {
+                    await apiRequest(`/menu/${currentUser.cafe_id}/categories`, {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                    showToast('Category created!', 'success');
+                }
+                
+                closeModal('categoryModal');
+                await loadCategories();
+                await loadMenuItems();
+                updateStats();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        async function deleteCategory(id) {
+            const itemCount = menuItems.filter(i => i.category_id === id).length;
+            const message = itemCount > 0 
+                ? `This category has ${itemCount} items. Are you sure you want to delete it?`
+                : 'Are you sure you want to delete this category?';
+            
+            if (!confirm(message)) return;
+            
+            try {
+                await apiRequest(`/menu/${currentUser.cafe_id}/categories/${id}`, {
+                    method: 'DELETE'
+                });
+                showToast('Category deleted!', 'success');
+                await loadCategories();
+                await loadMenuItems();
+                updateStats();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Item functions
+        function showAddItemModal() {
+            if (categories.length === 0) {
+                showToast('Create a category first', 'error');
+                showSection('categories');
+                return;
+            }
+            
+            document.getElementById('itemModalTitle').textContent = 'Add Menu Item';
+            document.getElementById('itemForm').reset();
+            document.getElementById('itemId').value = '';
+            showModal('itemModal');
+        }
+        
+        function editItem(id) {
+            const item = menuItems.find(i => i.id === id);
+            if (!item) return;
+            
+            document.getElementById('itemModalTitle').textContent = 'Edit Menu Item';
+            document.getElementById('itemId').value = item.id;
+            document.getElementById('itemName').value = item.name || '';
+            document.getElementById('itemCategory').value = item.category_id || '';
+            document.getElementById('itemDescription').value = item.description || '';
+            document.getElementById('itemPrice').value = item.price || '';
+            document.getElementById('itemOriginalPrice').value = item.original_price || '';
+            document.getElementById('itemImage').value = item.image || '';
+            document.getElementById('itemCalories').value = item.calories || '';
+            document.getElementById('itemVegan').checked = item.is_vegan;
+            document.getElementById('itemVegetarian').checked = item.is_vegetarian;
+            document.getElementById('itemGlutenFree').checked = item.is_gluten_free;
+            document.getElementById('itemSpicy').checked = item.is_spicy;
+            document.getElementById('itemBestseller').checked = item.is_bestseller;
+            document.getElementById('itemNew').checked = item.is_new;
+            
+            showModal('itemModal');
+        }
+        
+        async function saveItem() {
+            try {
+                const id = document.getElementById('itemId').value;
+                const data = {
+                    name: document.getElementById('itemName').value,
+                    category_id: document.getElementById('itemCategory').value,
+                    description: document.getElementById('itemDescription').value,
+                    price: parseFloat(document.getElementById('itemPrice').value) || 0,
+                    original_price: parseFloat(document.getElementById('itemOriginalPrice').value) || null,
+                    image: document.getElementById('itemImage').value,
+                    calories: parseInt(document.getElementById('itemCalories').value) || null,
+                    is_vegan: document.getElementById('itemVegan').checked,
+                    is_vegetarian: document.getElementById('itemVegetarian').checked,
+                    is_gluten_free: document.getElementById('itemGlutenFree').checked,
+                    is_spicy: document.getElementById('itemSpicy').checked,
+                    is_bestseller: document.getElementById('itemBestseller').checked,
+                    is_new: document.getElementById('itemNew').checked
+                };
+                
+                if (!data.name || !data.category_id) {
+                    throw new Error('Name and category are required');
+                }
+                
+                if (id) {
+                    await apiRequest(`/menu/${currentUser.cafe_id}/items/${id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(data)
+                    });
+                    showToast('Item updated!', 'success');
+                } else {
+                    await apiRequest(`/menu/${currentUser.cafe_id}/items`, {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                    showToast('Item created!', 'success');
+                }
+                
+                closeModal('itemModal');
+                await loadMenuItems();
+                updateStats();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        async function deleteItem(id) {
+            if (!confirm('Are you sure you want to delete this item?')) return;
+            
+            try {
+                await apiRequest(`/menu/${currentUser.cafe_id}/items/${id}`, {
+                    method: 'DELETE'
+                });
+                showToast('Item deleted!', 'success');
+                await loadMenuItems();
+                updateStats();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        async function toggleItemAvailability(id, available) {
+            try {
+                await apiRequest(`/menu/${currentUser.cafe_id}/items/${id}/toggle`, {
+                    method: 'POST'
+                });
+                
+                // Update local state
+                const item = menuItems.find(i => i.id === id);
+                if (item) {
+                    item.is_available = available;
+                }
+                updateStats();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+                // Reload to sync state
+                await loadMenuItems();
+            }
+        }
+        
+        // QR functions
+        async function regenerateQR() {
+            try {
+                const response = await apiRequest(`/cafe/${currentUser.cafe_id}/generate-qr`, {
+                    method: 'POST'
+                });
+                
+                cafeData.qr_code_path = response.qrCode;
+                showToast('QR code generated!', 'success');
+                loadQRCode();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        function downloadQR() {
+            if (!cafeData?.qr_code_path) {
+                showToast('No QR code to download. Click "Generate QR Code" first.', 'error');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.href = cafeData.qr_code_path;
+            link.download = `${cafeData.slug}-qr.png`;
+            link.click();
+        }
+        
+        // Settings
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                await apiRequest(`/cafe/${currentUser.cafe_id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        name: document.getElementById('settingName').value,
+                        tagline: document.getElementById('settingTagline').value,
+                        description: document.getElementById('settingDescription').value,
+                        phone: document.getElementById('settingPhone').value,
+                        email: document.getElementById('settingEmail').value,
+                        address: document.getElementById('settingAddress').value,
+                        currency: document.getElementById('settingCurrency').value,
+                        is_published: document.getElementById('settingStatus').value === '1'
+                    })
+                });
+                
+                showToast('Settings saved!', 'success');
+                await loadCafeData();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        });
+        
+        // Password
+        function showChangePassword() {
+            document.getElementById('passwordForm').reset();
+            showModal('passwordModal');
+        }
+        
+        async function changePassword() {
+            try {
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (!currentPassword || !newPassword) {
+                    throw new Error('Please fill in all fields');
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    throw new Error('New passwords do not match');
+                }
+                
+                if (newPassword.length < 6) {
+                    throw new Error('Password must be at least 6 characters');
+                }
+                
+                await apiRequest('/auth/change-password', {
+                    method: 'POST',
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                
+                showToast('Password changed successfully!', 'success');
+                closeModal('passwordModal');
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Logout
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        }
+        
+        // Utility functions
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `${type === 'success' ? '✓' : '✕'} ${escapeHtml(message)}`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        // Nav item clicks
+        document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(item.dataset.section);
+            });
+        });
+        
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Database (will be recreated)
+database/*.db
+
+# Uploads (user uploaded files)
+uploads/logos/*
+uploads/items/*
+uploads/qrcodes/*
+!uploads/logos/.gitkeep
+!uploads/items/.gitkeep
+!uploads/qrcodes/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Vercel
+.vercel

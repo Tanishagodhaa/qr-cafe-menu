@@ -1,0 +1,2373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - QR Menu System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f7fb;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-logo {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .sidebar-subtitle {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            margin-bottom: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 0.25rem;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        
+        .nav-item span {
+            font-size: 0.9rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 1.5rem;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        .header-title p {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+        
+        .user-menu:hover {
+            background: #f5f5f5;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            text-align: right;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        .user-role {
+            font-size: 0.75rem;
+            color: #888;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .stat-icon.blue { background: rgba(102, 126, 234, 0.1); }
+        .stat-icon.purple { background: rgba(118, 75, 162, 0.1); }
+        .stat-icon.green { background: rgba(76, 175, 80, 0.1); }
+        .stat-icon.orange { background: rgba(255, 152, 0, 0.1); }
+        
+        .stat-content h3 {
+            font-size: 1.75rem;
+            color: #333;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-content p {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h2 {
+            font-size: 1.1rem;
+            color: #333;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Button */
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #eee;
+        }
+        
+        .btn-danger {
+            background: #ff5252;
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+        }
+        
+        td {
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-published {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-draft {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        /* Activity List */
+        .activity-list {
+            list-style: none;
+        }
+        
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .activity-content p {
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        .activity-content span {
+            font-size: 0.75rem;
+            color: #888;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+        
+        .modal-overlay.show .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.25rem;
+            color: #333;
+        }
+        
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            background: #eee;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        /* Form */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #888;
+            position: relative;
+            transition: color 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: #667eea;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.6rem;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #667eea;
+            border-radius: 3px;
+        }
+        
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 3000;
+        }
+        
+        .toast {
+            background: #333;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .toast.success { background: #4caf50; }
+        .toast.error { background: #f44336; }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #eee;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Sections (for tab content) */
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        /* Action buttons in table */
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .action-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .action-btn.edit {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .action-btn.delete {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .action-btn.view {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .emoji-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .emoji-btn:hover, .emoji-btn.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .menu-category {
+            background: #f9f9f9;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .menu-category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-bottom: 1px solid #eee;
+        }
+        
+        .menu-category-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .menu-category-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .menu-item:hover {
+            background: #fafafa;
+        }
+        
+        .menu-item-info {
+            flex: 1;
+        }
+        
+        .menu-item-name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .menu-item-desc {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        
+        .menu-item-price {
+            font-weight: 600;
+            color: #2C5F2D;
+            font-size: 1rem;
+            margin-right: 1rem;
+        }
+        
+        .menu-item-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .badge-veg { background: #e8f5e9; color: #2e7d32; }
+        .badge-spicy { background: #ffebee; color: #c62828; }
+        .badge-popular { background: #fff3e0; color: #e65100; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">📱</div>
+            <div>
+                <div class="sidebar-title">QR Menu</div>
+                <div class="sidebar-subtitle">Admin Panel</div>
+            </div>
+        </div>
+        
+        <nav>
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="cafes">
+                    <svg viewBox="0 0 24 24"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.9 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>
+                    <span>Cafés</span>
+                </a>
+                <a href="#" class="nav-item" data-section="owners">
+                    <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    <span>Café Owners</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="#" class="nav-item" data-section="activity">
+                    <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                    <span>Activity Log</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Account</div>
+                <a href="#" class="nav-item" onclick="logout()">
+                    <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <h1 id="pageTitle">Dashboard</h1>
+                <p id="pageSubtitle">Welcome back, Admin</p>
+            </div>
+            <div class="header-actions">
+                <div class="user-menu" id="userMenu">
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Admin</div>
+                        <div class="user-role">Super Admin</div>
+                    </div>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Dashboard Section -->
+        <section id="dashboardSection" class="section active">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">☕</div>
+                    <div class="stat-content">
+                        <h3 id="totalCafes">0</h3>
+                        <p>Total Cafés</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple">👥</div>
+                    <div class="stat-content">
+                        <h3 id="totalOwners">0</h3>
+                        <p>Café Owners</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">🍽️</div>
+                    <div class="stat-content">
+                        <h3 id="totalItems">0</h3>
+                        <p>Menu Items</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">✅</div>
+                    <div class="stat-content">
+                        <h3 id="publishedMenus">0</h3>
+                        <p>Published Menus</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Recent Cafes -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Recent Cafés</h2>
+                        <button class="btn btn-primary btn-sm" onclick="showSection('cafes')">View All</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Owner</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentCafesTable">
+                                    <tr>
+                                        <td colspan="4" class="loading">
+                                            <div class="spinner"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    <div class="card-body">
+                        <ul class="activity-list" id="recentActivity">
+                            <li class="loading">
+                                <div class="spinner"></div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Cafes Section -->
+        <section id="cafesSection" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>All Cafés</h2>
+                    <button class="btn btn-primary" onclick="showCreateCafeModal()">
+                        + Add Café
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Slug</th>
+                                    <th>Owner</th>
+                                    <th>Items</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cafesTable">
+                                <tr>
+                                    <td colspan="6" class="loading">
+                                        <div class="spinner"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Owners Section -->
+        <section id="ownersSection" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Café Owners</h2>
+                    <button class="btn btn-primary" onclick="showCreateOwnerModal()">
+                        + Add Owner
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Assigned Café</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ownersTable">
+                                <tr>
+                                    <td colspan="5" class="loading">
+                                        <div class="spinner"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Activity Section -->
+        <section id="activitySection" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Activity Log</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="activity-list" id="fullActivityList">
+                        <li class="loading">
+                            <div class="spinner"></div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Create Cafe Modal -->
+    <div class="modal-overlay" id="createCafeModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Add New Café</h2>
+                <button class="modal-close" onclick="closeModal('createCafeModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="manualCafeForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Café Name *</label>
+                            <input type="text" id="cafeName" placeholder="My Café" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Slug</label>
+                            <input type="text" id="cafeSlug" placeholder="my-cafe (auto-generated)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tagline</label>
+                        <input type="text" id="cafeTagline" placeholder="Best coffee in town">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="cafeDescription" rows="3" placeholder="Tell customers about your café..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="cafePhone" placeholder="+1 234 567 890">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="cafeEmail" placeholder="contact@cafe.com">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" id="cafeAddress" placeholder="123 Main St, City">
+                    </div>
+                    <div class="form-group">
+                        <label>Assign Owner (Optional)</label>
+                        <select id="manualOwnerSelect">
+                            <option value="">No owner assigned</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('createCafeModal')">Cancel</button>
+                <button class="btn btn-primary" id="createCafeBtn" onclick="createCafe()"><i class="fas fa-plus"></i> Create Café</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create Owner Modal -->
+    <div class="modal-overlay" id="createOwnerModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Add New Owner</h2>
+                <button class="modal-close" onclick="closeModal('createOwnerModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="ownerForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name *</label>
+                            <input type="text" id="ownerName" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="ownerEmail" placeholder="owner@cafe.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Assign Café (Optional)</label>
+                        <select id="ownerCafeSelect">
+                            <option value="">No café assigned</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="background: #f0f7ff; padding: 1rem; border-radius: 10px;">
+                        <p style="font-size: 0.85rem; color: #0066cc;">
+                            ℹ️ A temporary password will be auto-generated and shown after creation. Make sure to copy and share it with the owner.
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('createOwnerModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="createOwner()">Create Owner</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Credentials Modal -->
+    <div class="modal-overlay" id="credentialsModal">
+        <div class="modal" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>Owner Credentials</h2>
+                <button class="modal-close" onclick="closeModal('credentialsModal')">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                <h3 style="margin-bottom: 1rem;">Owner Created Successfully!</h3>
+                <p style="color: #666; margin-bottom: 1.5rem;">Share these credentials with the café owner:</p>
+                
+                <div style="background: #f5f5f5; padding: 1.5rem; border-radius: 12px; text-align: left;">
+                    <p style="margin-bottom: 0.75rem;">
+                        <strong>Email:</strong><br>
+                        <span id="credEmail" style="font-family: monospace; font-size: 1rem;"></span>
+                    </p>
+                    <p>
+                        <strong>Temporary Password:</strong><br>
+                        <span id="credPassword" style="font-family: monospace; font-size: 1rem;"></span>
+                    </p>
+                </div>
+                
+                <p style="color: #ff5252; font-size: 0.85rem; margin-top: 1rem;">
+                    ⚠️ This password will only be shown once!
+                </p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn btn-primary" onclick="copyCredentials()">Copy Credentials</button>
+                <button class="btn btn-secondary" onclick="closeModal('credentialsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Manage Cafe Modal -->
+    <div class="modal-overlay" id="manageCafeModal">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2 id="manageCafeTitle">Manage Café</h2>
+                <button class="modal-close" onclick="closeModal('manageCafeModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchManageTab('details')">Details</button>
+                    <button class="tab-btn" onclick="switchManageTab('menu')">Menu</button>
+                    <button class="tab-btn" onclick="switchManageTab('qr')">QR Code</button>
+                    <button class="tab-btn" onclick="switchManageTab('preview')">Preview</button>
+                </div>
+                
+                <!-- Details Tab -->
+                <div id="manageDetailsTab" class="manage-tab active">
+                    <form id="editCafeForm" enctype="multipart/form-data">
+                        <input type="hidden" id="editCafeId">
+                        
+                        <!-- Logo Upload Section -->
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label>Café Logo</label>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div id="logoPreview" style="width: 80px; height: 80px; border-radius: 12px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px dashed #ddd;">
+                                    <span style="font-size: 2rem; color: #ccc;">☕</span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <input type="file" id="editCafeLogo" accept="image/*" style="display: none;" onchange="previewLogo(this)">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('editCafeLogo').click()" style="font-size: 0.85rem;">
+                                        📷 Upload Logo
+                                    </button>
+                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #888;">Recommended: 200x200px, PNG or JPG</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Café Name</label>
+                                <input type="text" id="editCafeName">
+                            </div>
+                            <div class="form-group">
+                                <label>Slug</label>
+                                <input type="text" id="editCafeSlug" readonly style="background: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Tagline</label>
+                            <input type="text" id="editCafeTagline">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" id="editCafePhone">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="editCafeEmailField">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" id="editCafeAddress">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="editCafeStatus">
+                                <option value="0">Draft</option>
+                                <option value="1">Published</option>
+                            </select>
+                        </div>
+                    </form>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="saveCafeDetails()">Save Changes</button>
+                    </div>
+                </div>
+                
+                <!-- Menu Tab -->
+                <div id="manageMenuTab" class="manage-tab" style="display: none;">
+                    <!-- Quick Actions -->
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="addSampleMenu()" style="flex: 1; min-width: 200px;">
+                            <i class="fas fa-magic"></i> Add Sample Menu Template
+                        </button>
+                        <button class="btn btn-secondary" onclick="showAddCategoryModal()" style="flex: 1; min-width: 200px;">
+                            <i class="fas fa-plus"></i> Add Category Manually
+                        </button>
+                    </div>
+                    
+                    <!-- Import from Google Info Box -->
+                    <div style="background: #f0f4ff; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; border-left: 4px solid #667eea;">
+                        <p style="margin: 0; color: #555; font-size: 0.9rem;">
+                            <strong>💡 Tip:</strong> Google Maps doesn't expose menu items in a scrapeable format. 
+                            Use the <strong>Sample Menu Template</strong> as a starting point, then edit items to match your actual menu.
+                        </p>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 style="margin: 0;">Menu Categories & Items</h4>
+                        <span id="menuItemCount" style="color: #888; font-size: 0.9rem;"></span>
+                    </div>
+                    
+                    <div id="menuCategories">
+                        <div class="empty-state" style="padding: 2rem; text-align: center; color: #666; background: #f9f9f9; border-radius: 12px;">
+                            <i class="fas fa-utensils" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <p style="margin: 0;">No menu items yet.</p>
+                            <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Click "Add Sample Menu Template" to get started quickly!</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- QR Tab -->
+                <div id="manageQrTab" class="manage-tab" style="display: none; text-align: center;">
+                    <div id="qrCodeContainer" style="padding: 2rem;">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="downloadQR()">Download QR Code</button>
+                    <button class="btn btn-secondary" onclick="generateQR()">Regenerate QR</button>
+                </div>
+                
+                <!-- Preview Tab -->
+                <div id="managePreviewTab" class="manage-tab" style="display: none;">
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                            📱 This is how your menu will look when customers scan the QR code:
+                        </p>
+                    </div>
+                    <div style="display: flex; justify-content: center;">
+                        <div style="width: 375px; height: 667px; border: 8px solid #333; border-radius: 30px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2); background: #fff;">
+                            <iframe id="menuPreviewFrame" style="width: 100%; height: 100%; border: none;"></iframe>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <button class="btn btn-secondary" onclick="refreshPreview()">
+                            <i class="fas fa-sync-alt"></i> Refresh Preview
+                        </button>
+                        <button class="btn btn-primary" onclick="openMenuInNewTab()">
+                            <i class="fas fa-external-link-alt"></i> Open in New Tab
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Category Modal -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 id="categoryModalTitle">Add Category</h2>
+                <button class="modal-close" onclick="closeModal('categoryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <input type="hidden" id="editCategoryId">
+                    <div class="form-group">
+                        <label>Category Name *</label>
+                        <input type="text" id="categoryName" placeholder="e.g., Hot Beverages" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Icon (emoji)</label>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('☕')">☕</button>
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('🧊')">🧊</button>
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('🍵')">🍵</button>
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('🥐')">🥐</button>
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('🍳')">🍳</button>
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('🥪')">🥪</button>
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('🍕')">🍕</button>
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('🍔')">🍔</button>
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('🥗')">🥗</button>
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('🍰')">🍰</button>
+                            <button type="button" class="emoji-btn" onclick="selectEmoji('🍽️')">🍽️</button>
+                        </div>
+                        <input type="text" id="categoryIcon" placeholder="🍽️" style="width: 60px; text-align: center; font-size: 1.5rem;">
+                    </div>
+                    <div class="form-group">
+                        <label>Description (optional)</label>
+                        <input type="text" id="categoryDescription" placeholder="Brief description...">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('categoryModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCategory()">Save Category</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Item Modal -->
+    <div class="modal-overlay" id="itemModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="itemModalTitle">Add Menu Item</h2>
+                <button class="modal-close" onclick="closeModal('itemModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="itemForm">
+                    <input type="hidden" id="editItemId">
+                    <input type="hidden" id="editItemCategoryId">
+                    <div class="form-group">
+                        <label>Item Name *</label>
+                        <input type="text" id="itemName" placeholder="e.g., Cappuccino" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price *</label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.2rem;">$</span>
+                            <input type="number" id="itemPrice" placeholder="0.00" step="0.01" min="0" required style="flex: 1;">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="itemDescription" rows="2" placeholder="Brief description of the item..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="itemIsVeg" style="width: auto; margin-right: 0.5rem;">
+                                Vegetarian
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="itemIsSpicy" style="width: auto; margin-right: 0.5rem;">
+                                Spicy
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="itemIsPopular" style="width: auto; margin-right: 0.5rem;">
+                                Popular
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('itemModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        const API_BASE = '/api';
+        let currentUser = null;
+        let currentSection = 'dashboard';
+        let cafes = [];
+        let owners = [];
+        let managingCafeId = null;
+        
+        // Check authentication
+        async function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                currentUser = JSON.parse(user);
+                
+                // Verify token and check if admin
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Invalid token');
+                }
+                
+                const data = await response.json();
+                if (data.user.role !== 'admin') {
+                    window.location.href = '/owner/dashboard.html';
+                    return;
+                }
+                
+                currentUser = data.user;
+                updateUserDisplay();
+                loadDashboardData();
+                
+            } catch (error) {
+                console.error('Auth error:', error);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Update user display
+        function updateUserDisplay() {
+            document.getElementById('userName').textContent = currentUser.name || 'Admin';
+            document.getElementById('userAvatar').textContent = (currentUser.name || 'A')[0].toUpperCase();
+            document.getElementById('pageSubtitle').textContent = `Welcome back, ${currentUser.name || 'Admin'}`;
+        }
+        
+        // API helper
+        async function apiRequest(endpoint, options = {}) {
+            const token = localStorage.getItem('token');
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            const response = await fetch(`${API_BASE}${endpoint}`, {
+                ...defaultOptions,
+                ...options,
+                headers: { ...defaultOptions.headers, ...options.headers }
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Request failed');
+            }
+            
+            return data;
+        }
+        
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load stats
+                const stats = await apiRequest('/admin/stats');
+                document.getElementById('totalCafes').textContent = stats.totalCafes || 0;
+                document.getElementById('totalOwners').textContent = stats.totalOwners || 0;
+                document.getElementById('totalItems').textContent = stats.totalMenuItems || 0;
+                document.getElementById('publishedMenus').textContent = stats.publishedMenus || 0;
+                
+                // Load cafes
+                await loadCafes();
+                
+                // Load recent activity
+                await loadActivity();
+                
+                // Load owners
+                await loadOwners();
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showToast('Failed to load dashboard data', 'error');
+            }
+        }
+        
+        // Load cafes
+        async function loadCafes() {
+            try {
+                const data = await apiRequest('/admin/cafes');
+                cafes = data.cafes || [];
+                
+                // Update recent cafes table
+                const recentTable = document.getElementById('recentCafesTable');
+                const cafesTable = document.getElementById('cafesTable');
+                
+                if (cafes.length === 0) {
+                    recentTable.innerHTML = '<tr><td colspan="4" class="empty-state">No cafés yet</td></tr>';
+                    cafesTable.innerHTML = '<tr><td colspan="6" class="empty-state">No cafés yet. Click "Add Café" to create one.</td></tr>';
+                } else {
+                    // Recent (last 5)
+                    recentTable.innerHTML = cafes.slice(0, 5).map(cafe => `
+                        <tr>
+                            <td><strong>${escapeHtml(cafe.name)}</strong></td>
+                            <td>${escapeHtml(cafe.owner_name || 'Unassigned')}</td>
+                            <td><span class="status-badge ${cafe.is_published ? 'status-published' : 'status-draft'}">${cafe.is_published ? 'Published' : 'Draft'}</span></td>
+                            <td>${formatDate(cafe.created_at)}</td>
+                        </tr>
+                    `).join('');
+                    
+                    // All cafes
+                    cafesTable.innerHTML = cafes.map(cafe => `
+                        <tr>
+                            <td><strong>${escapeHtml(cafe.name)}</strong></td>
+                            <td><code>${cafe.slug}</code></td>
+                            <td>${escapeHtml(cafe.owner_name || 'Unassigned')}</td>
+                            <td>${cafe.item_count || 0}</td>
+                            <td><span class="status-badge ${cafe.is_published ? 'status-published' : 'status-draft'}">${cafe.is_published ? 'Published' : 'Draft'}</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="action-btn view" onclick="viewMenu('${cafe.slug}')" title="View Menu">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                                    </button>
+                                    <button class="action-btn edit" onclick="manageCafe(${cafe.id})" title="Manage">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                    </button>
+                                    <button class="action-btn delete" onclick="deleteCafe(${cafe.id})" title="Delete">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                
+                // Update owner selects
+                updateOwnerSelects();
+                
+            } catch (error) {
+                console.error('Error loading cafes:', error);
+            }
+        }
+        
+        // Load owners
+        async function loadOwners() {
+            try {
+                const data = await apiRequest('/admin/owners');
+                owners = data.owners || [];
+                
+                const ownersTable = document.getElementById('ownersTable');
+                
+                if (owners.length === 0) {
+                    ownersTable.innerHTML = '<tr><td colspan="5" class="empty-state">No café owners yet. Click "Add Owner" to create one.</td></tr>';
+                } else {
+                    ownersTable.innerHTML = owners.map(owner => `
+                        <tr>
+                            <td><strong>${escapeHtml(owner.name)}</strong></td>
+                            <td>${escapeHtml(owner.email)}</td>
+                            <td>${owner.cafe_name ? escapeHtml(owner.cafe_name) : '<span style="color: #888;">Unassigned</span>'}</td>
+                            <td>${formatDate(owner.created_at)}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="action-btn edit" onclick="editOwner(${owner.id})" title="Edit">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                    </button>
+                                    <button class="action-btn delete" onclick="deleteOwner(${owner.id})" title="Delete">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                
+                // Update cafe selects
+                updateCafeSelects();
+                
+            } catch (error) {
+                console.error('Error loading owners:', error);
+            }
+        }
+        
+        // Load activity
+        async function loadActivity() {
+            try {
+                const data = await apiRequest('/admin/activity');
+                const activities = data.activities || [];
+                
+                const recentActivity = document.getElementById('recentActivity');
+                const fullActivityList = document.getElementById('fullActivityList');
+                
+                if (activities.length === 0) {
+                    recentActivity.innerHTML = '<li class="empty-state">No recent activity</li>';
+                    fullActivityList.innerHTML = '<li class="empty-state">No activity recorded yet</li>';
+                } else {
+                    const activityHtml = activities.map(act => `
+                        <li class="activity-item">
+                            <div class="activity-icon">${getActivityIcon(act.action)}</div>
+                            <div class="activity-content">
+                                <p><strong>${escapeHtml(act.user_name || 'System')}</strong> ${escapeHtml(act.action)}</p>
+                                <span>${formatDate(act.created_at)}</span>
+                            </div>
+                        </li>
+                    `).join('');
+                    
+                    recentActivity.innerHTML = activityHtml;
+                    fullActivityList.innerHTML = activityHtml;
+                }
+                
+            } catch (error) {
+                console.error('Error loading activity:', error);
+            }
+        }
+        
+        // Update owner selects
+        function updateOwnerSelects() {
+            const selects = ['googleOwnerSelect', 'manualOwnerSelect'];
+            const unassignedOwners = owners.filter(o => !o.cafe_id);
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.innerHTML = '<option value="">No owner assigned</option>' +
+                        unassignedOwners.map(o => `<option value="${o.id}">${escapeHtml(o.name)} (${escapeHtml(o.email)})</option>`).join('');
+                }
+            });
+        }
+        
+        // Update cafe selects
+        function updateCafeSelects() {
+            const select = document.getElementById('ownerCafeSelect');
+            const unassignedCafes = cafes.filter(c => !c.owner_id);
+            
+            if (select) {
+                select.innerHTML = '<option value="">No café assigned</option>' +
+                    unassignedCafes.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+            }
+        }
+        
+        // Show section
+        function showSection(section) {
+            currentSection = section;
+            
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.section === section);
+            });
+            
+            // Update sections
+            document.querySelectorAll('.section').forEach(s => {
+                s.classList.remove('active');
+            });
+            document.getElementById(`${section}Section`).classList.add('active');
+            
+            // Update title
+            const titles = {
+                dashboard: 'Dashboard',
+                cafes: 'Cafés',
+                owners: 'Café Owners',
+                activity: 'Activity Log'
+            };
+            document.getElementById('pageTitle').textContent = titles[section] || 'Dashboard';
+        }
+        
+        // Switch manage tab
+        function switchManageTab(tab) {
+            const tabs = ['details', 'menu', 'qr', 'preview'];
+            document.querySelectorAll('#manageCafeModal .tab-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', tabs[idx] === tab);
+            });
+            document.querySelectorAll('.manage-tab').forEach(t => t.style.display = 'none');
+            document.getElementById(`manage${tab.charAt(0).toUpperCase() + tab.slice(1)}Tab`).style.display = 'block';
+            
+            if (tab === 'qr' && managingCafeId) {
+                loadQRCode();
+            } else if (tab === 'menu' && managingCafeId) {
+                loadCafeMenu();
+            } else if (tab === 'preview' && managingCafeId) {
+                loadPreview();
+            }
+        }
+        
+        // Modal functions
+        function showModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+        
+        function showCreateCafeModal() {
+            document.getElementById('manualCafeForm').reset();
+            showModal('createCafeModal');
+        }
+        
+        function showCreateOwnerModal() {
+            document.getElementById('ownerForm').reset();
+            updateCafeSelects();
+            showModal('createOwnerModal');
+        }
+        
+        // Create cafe (manual only)
+        async function createCafe() {
+            const btn = document.getElementById('createCafeBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            
+            try {
+                const name = document.getElementById('cafeName').value;
+                const slug = document.getElementById('cafeSlug').value;
+                const tagline = document.getElementById('cafeTagline').value;
+                const description = document.getElementById('cafeDescription').value;
+                const phone = document.getElementById('cafePhone').value;
+                const email = document.getElementById('cafeEmail').value;
+                const address = document.getElementById('cafeAddress').value;
+                const ownerId = document.getElementById('manualOwnerSelect').value;
+                
+                if (!name) {
+                    throw new Error('Please enter a café name');
+                }
+                
+                const response = await apiRequest('/cafe/manual', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name, slug, tagline, description, phone, email, address,
+                        ownerId: ownerId || null
+                    })
+                });
+                
+                showToast('Café created successfully! Now add menu items.', 'success');
+                closeModal('createCafeModal');
+                loadCafes();
+                loadOwners();
+                
+                // Open the manage modal on menu tab for the new cafe
+                setTimeout(() => {
+                    manageCafe(response.cafe.id);
+                    setTimeout(() => switchManageTab('menu'), 300);
+                }, 500);
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-plus"></i> Create Café';
+            }
+        }
+        
+        // Add sample menu template
+        async function addSampleMenu() {
+            if (!managingCafeId) {
+                showToast('No café selected', 'error');
+                return;
+            }
+            
+            if (!confirm('This will add a sample café menu with categories and items. Continue?')) {
+                return;
+            }
+            
+            try {
+                const response = await apiRequest(`/cafe/${managingCafeId}/sample-menu`, {
+                    method: 'POST'
+                });
+                
+                showToast(`Added ${response.categoriesAdded} categories with ${response.itemsAdded} items!`, 'success');
+                loadCafeMenu();
+                loadCafes(); // Refresh item counts
+                
+            } catch (error) {
+                showToast(error.message || 'Failed to add sample menu', 'error');
+            }
+        }
+        
+        // ================== CATEGORY MANAGEMENT ==================
+        
+        // Show add category modal
+        function showAddCategoryModal() {
+            document.getElementById('categoryModalTitle').textContent = 'Add Category';
+            document.getElementById('categoryForm').reset();
+            document.getElementById('editCategoryId').value = '';
+            document.getElementById('categoryIcon').value = '🍽️';
+            showModal('categoryModal');
+        }
+        
+        // Show edit category modal
+        function showEditCategoryModal(id, name, icon, description) {
+            document.getElementById('categoryModalTitle').textContent = 'Edit Category';
+            document.getElementById('editCategoryId').value = id;
+            document.getElementById('categoryName').value = name;
+            document.getElementById('categoryIcon').value = icon || '🍽️';
+            document.getElementById('categoryDescription').value = description || '';
+            showModal('categoryModal');
+        }
+        
+        // Select emoji for category
+        function selectEmoji(emoji) {
+            document.getElementById('categoryIcon').value = emoji;
+            document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+        
+        // Save category (add or update)
+        async function saveCategory() {
+            const id = document.getElementById('editCategoryId').value;
+            const name = document.getElementById('categoryName').value.trim();
+            const icon = document.getElementById('categoryIcon').value || '🍽️';
+            const description = document.getElementById('categoryDescription').value.trim();
+            
+            if (!name) {
+                showToast('Please enter a category name', 'error');
+                return;
+            }
+            
+            try {
+                if (id) {
+                    // Update
+                    await apiRequest(`/menu/${managingCafeId}/categories/${id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ name, icon, description })
+                    });
+                    showToast('Category updated!', 'success');
+                } else {
+                    // Create
+                    await apiRequest(`/menu/${managingCafeId}/categories`, {
+                        method: 'POST',
+                        body: JSON.stringify({ name, icon, description })
+                    });
+                    showToast('Category added!', 'success');
+                }
+                
+                closeModal('categoryModal');
+                loadCafeMenu();
+                
+            } catch (error) {
+                showToast(error.message || 'Failed to save category', 'error');
+            }
+        }
+        
+        // Delete category
+        async function deleteCategory(id) {
+            if (!confirm('Delete this category and all its items? This cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                await apiRequest(`/menu/${managingCafeId}/categories/${id}`, {
+                    method: 'DELETE'
+                });
+                showToast('Category deleted!', 'success');
+                loadCafeMenu();
+                loadCafes();
+                
+            } catch (error) {
+                showToast(error.message || 'Failed to delete category', 'error');
+            }
+        }
+        
+        // ================== ITEM MANAGEMENT ==================
+        
+        // Show add item modal
+        function showAddItemModal(categoryId) {
+            document.getElementById('itemModalTitle').textContent = 'Add Menu Item';
+            document.getElementById('itemForm').reset();
+            document.getElementById('editItemId').value = '';
+            document.getElementById('editItemCategoryId').value = categoryId;
+            showModal('itemModal');
+        }
+        
+        // Show edit item modal
+        async function showEditItemModal(itemId, categoryId) {
+            document.getElementById('itemModalTitle').textContent = 'Edit Menu Item';
+            document.getElementById('editItemId').value = itemId;
+            document.getElementById('editItemCategoryId').value = categoryId;
+            
+            try {
+                const item = await apiRequest(`/menu/${managingCafeId}/items/${itemId}`);
+                document.getElementById('itemName').value = item.name || '';
+                document.getElementById('itemPrice').value = item.price || 0;
+                document.getElementById('itemDescription').value = item.description || '';
+                document.getElementById('itemIsVeg').checked = item.is_vegetarian || false;
+                document.getElementById('itemIsSpicy').checked = item.is_spicy || false;
+                document.getElementById('itemIsPopular').checked = item.is_popular || false;
+                showModal('itemModal');
+            } catch (error) {
+                showToast('Failed to load item details', 'error');
+            }
+        }
+        
+        // Save item (add or update)
+        async function saveItem() {
+            const id = document.getElementById('editItemId').value;
+            const categoryId = document.getElementById('editItemCategoryId').value;
+            const name = document.getElementById('itemName').value.trim();
+            const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            const description = document.getElementById('itemDescription').value.trim();
+            const is_vegetarian = document.getElementById('itemIsVeg').checked;
+            const is_spicy = document.getElementById('itemIsSpicy').checked;
+            const is_popular = document.getElementById('itemIsPopular').checked;
+            
+            if (!name) {
+                showToast('Please enter an item name', 'error');
+                return;
+            }
+            
+            if (price < 0) {
+                showToast('Price cannot be negative', 'error');
+                return;
+            }
+            
+            try {
+                const data = { name, price, description, is_vegetarian, is_spicy, is_popular };
+                
+                if (id) {
+                    // Update
+                    await apiRequest(`/menu/${managingCafeId}/items/${id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(data)
+                    });
+                    showToast('Item updated!', 'success');
+                } else {
+                    // Create
+                    await apiRequest(`/menu/${managingCafeId}/categories/${categoryId}/items`, {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                    showToast('Item added!', 'success');
+                }
+                
+                closeModal('itemModal');
+                loadCafeMenu();
+                loadCafes();
+                
+            } catch (error) {
+                showToast(error.message || 'Failed to save item', 'error');
+            }
+        }
+        
+        // Delete item
+        async function deleteItem(id) {
+            if (!confirm('Delete this item? This cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                await apiRequest(`/menu/${managingCafeId}/items/${id}`, {
+                    method: 'DELETE'
+                });
+                showToast('Item deleted!', 'success');
+                loadCafeMenu();
+                loadCafes();
+                
+            } catch (error) {
+                showToast(error.message || 'Failed to delete item', 'error');
+            }
+        }
+        
+        // ================== OWNER MANAGEMENT ==================
+        
+        // Create owner
+        async function createOwner() {
+            try {
+                const name = document.getElementById('ownerName').value;
+                const email = document.getElementById('ownerEmail').value;
+                const cafeId = document.getElementById('ownerCafeSelect').value;
+                
+                if (!name || !email) {
+                    throw new Error('Please fill in all required fields');
+                }
+                
+                const response = await apiRequest('/admin/owners', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, email, cafeId: cafeId || null })
+                });
+                
+                // Show credentials
+                document.getElementById('credEmail').textContent = email;
+                document.getElementById('credPassword').textContent = response.tempPassword;
+                
+                closeModal('createOwnerModal');
+                showModal('credentialsModal');
+                
+                loadOwners();
+                loadDashboardData();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Copy credentials
+        function copyCredentials() {
+            const email = document.getElementById('credEmail').textContent;
+            const password = document.getElementById('credPassword').textContent;
+            const text = `Email: ${email}\nPassword: ${password}`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Credentials copied to clipboard!', 'success');
+            });
+        }
+        
+        // Manage cafe
+        async function manageCafe(cafeId) {
+            managingCafeId = cafeId;
+            const cafe = cafes.find(c => c.id === cafeId);
+            
+            if (!cafe) return;
+            
+            document.getElementById('manageCafeTitle').textContent = `Manage: ${cafe.name}`;
+            document.getElementById('editCafeId').value = cafe.id;
+            document.getElementById('editCafeName').value = cafe.name || '';
+            document.getElementById('editCafeSlug').value = cafe.slug || '';
+            document.getElementById('editCafeTagline').value = cafe.tagline || '';
+            document.getElementById('editCafePhone').value = cafe.phone || '';
+            document.getElementById('editCafeEmailField').value = cafe.email || '';
+            document.getElementById('editCafeAddress').value = cafe.address || '';
+            document.getElementById('editCafeStatus').value = cafe.is_published ? '1' : '0';
+            
+            // Reset logo input and show current logo
+            document.getElementById('editCafeLogo').value = '';
+            const logoPreview = document.getElementById('logoPreview');
+            if (cafe.logo) {
+                logoPreview.innerHTML = `<img src="${cafe.logo}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            } else {
+                logoPreview.innerHTML = '<span style="font-size: 2rem; color: #ccc;">☕</span>';
+            }
+            
+            switchManageTab('details');
+            showModal('manageCafeModal');
+        }
+        
+        // Preview logo before upload
+        function previewLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('logoPreview').innerHTML = 
+                        `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // Save cafe details
+        async function saveCafeDetails() {
+            try {
+                const cafeId = document.getElementById('editCafeId').value;
+                const logoFile = document.getElementById('editCafeLogo').files[0];
+                
+                // Use FormData if there's a logo, otherwise use JSON
+                if (logoFile) {
+                    const formData = new FormData();
+                    formData.append('logo', logoFile);
+                    formData.append('name', document.getElementById('editCafeName').value);
+                    formData.append('tagline', document.getElementById('editCafeTagline').value);
+                    formData.append('phone', document.getElementById('editCafePhone').value);
+                    formData.append('email', document.getElementById('editCafeEmailField').value);
+                    formData.append('address', document.getElementById('editCafeAddress').value);
+                    formData.append('is_published', document.getElementById('editCafeStatus').value === '1');
+                    
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(`/api/cafe/${cafeId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        const data = await response.json();
+                        throw new Error(data.error || 'Failed to update');
+                    }
+                } else {
+                    await apiRequest(`/cafe/${cafeId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            name: document.getElementById('editCafeName').value,
+                            tagline: document.getElementById('editCafeTagline').value,
+                            phone: document.getElementById('editCafePhone').value,
+                            email: document.getElementById('editCafeEmailField').value,
+                            address: document.getElementById('editCafeAddress').value,
+                            is_published: document.getElementById('editCafeStatus').value === '1'
+                        })
+                    });
+                }
+                
+                showToast('Café updated successfully!', 'success');
+                loadCafes();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Load cafe menu
+        async function loadCafeMenu() {
+            const container = document.getElementById('menuCategories');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            try {
+                const data = await apiRequest(`/menu/${managingCafeId}/full`);
+                const categories = data.categories || [];
+                
+                // Update item count
+                const totalItems = categories.reduce((sum, cat) => sum + (cat.items?.length || 0), 0);
+                document.getElementById('menuItemCount').textContent = `${categories.length} categories, ${totalItems} items`;
+                
+                if (categories.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="padding: 2rem; text-align: center; color: #666; background: #f9f9f9; border-radius: 12px;">
+                            <i class="fas fa-utensils" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <p style="margin: 0;">No menu items yet.</p>
+                            <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Click "Add Sample Menu Template" to get started quickly!</p>
+                        </div>`;
+                } else {
+                    container.innerHTML = categories.map(cat => `
+                        <div class="menu-category">
+                            <div class="menu-category-header">
+                                <div class="menu-category-title">
+                                    <span style="font-size: 1.3rem;">${cat.icon || '🍽️'}</span>
+                                    <span>${escapeHtml(cat.name)}</span>
+                                    <span style="background: #e0e0e0; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.75rem; font-weight: normal;">${cat.items?.length || 0}</span>
+                                </div>
+                                <div class="menu-category-actions">
+                                    <button class="action-btn" onclick="showAddItemModal(${cat.id})" title="Add Item" style="background: #e8f5e9; color: #388e3c;">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                                    </button>
+                                    <button class="action-btn edit" onclick="showEditCategoryModal(${cat.id}, '${escapeHtml(cat.name)}', '${cat.icon || '🍽️'}', '${escapeHtml(cat.description || '')}')" title="Edit Category">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                    </button>
+                                    <button class="action-btn delete" onclick="deleteCategory(${cat.id})" title="Delete Category">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            ${cat.items && cat.items.length > 0 ? `
+                                <div class="menu-items">
+                                    ${cat.items.map(item => `
+                                        <div class="menu-item">
+                                            <div class="menu-item-info">
+                                                <div class="menu-item-name">
+                                                    ${escapeHtml(item.name)}
+                                                    ${item.is_vegetarian ? '<span class="badge badge-veg">VEG</span>' : ''}
+                                                    ${item.is_spicy ? '<span class="badge badge-spicy">🌶️</span>' : ''}
+                                                    ${item.is_popular ? '<span class="badge badge-popular">⭐ Popular</span>' : ''}
+                                                </div>
+                                                ${item.description ? `<div class="menu-item-desc">${escapeHtml(item.description)}</div>` : ''}
+                                            </div>
+                                            <div class="menu-item-price">$${parseFloat(item.price || 0).toFixed(2)}</div>
+                                            <div class="menu-item-actions">
+                                                <button class="action-btn edit" onclick="showEditItemModal(${item.id}, ${cat.id})" title="Edit">
+                                                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                                </button>
+                                                <button class="action-btn delete" onclick="deleteItem(${item.id})" title="Delete">
+                                                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <div style="padding: 1.5rem; text-align: center; color: #999;">
+                                    <p style="margin: 0;">No items in this category</p>
+                                    <button class="btn btn-secondary" onclick="showAddItemModal(${cat.id})" style="margin-top: 0.5rem; font-size: 0.85rem;">
+                                        <i class="fas fa-plus"></i> Add First Item
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    `).join('');
+                }
+                
+            } catch (error) {
+                container.innerHTML = '<p style="color: #ff5252;">Failed to load menu</p>';
+                console.error('Load menu error:', error);
+            }
+        }
+        
+        // Load QR code
+        async function loadQRCode() {
+            const container = document.getElementById('qrCodeContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            try {
+                const cafe = cafes.find(c => c.id === managingCafeId);
+                if (!cafe) return;
+                
+                if (cafe.qr_code_path) {
+                    container.innerHTML = `
+                        <img src="${cafe.qr_code_path}" alt="QR Code" style="max-width: 250px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <p style="margin-top: 1rem; color: #666;">Scan to view menu at:<br><code>/m/${cafe.slug}</code></p>
+                    `;
+                } else {
+                    container.innerHTML = '<p style="color: #888;">No QR code generated yet. Click "Regenerate QR" to create one.</p>';
+                }
+                
+            } catch (error) {
+                container.innerHTML = '<p style="color: #ff5252;">Failed to load QR code</p>';
+            }
+        }
+        
+        // Generate QR
+        async function generateQR() {
+            try {
+                const response = await apiRequest(`/cafe/${managingCafeId}/generate-qr`, {
+                    method: 'POST'
+                });
+                
+                showToast('QR code generated!', 'success');
+                loadCafes();
+                loadQRCode();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Download QR
+        function downloadQR() {
+            const cafe = cafes.find(c => c.id === managingCafeId);
+            if (!cafe || !cafe.qr_code_path) {
+                showToast('No QR code to download. Click "Regenerate QR" first.', 'error');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.href = cafe.qr_code_path;
+            link.download = `${cafe.slug}-qr.png`;
+            link.click();
+        }
+        
+        // View menu
+        function viewMenu(slug) {
+            window.open(`/menu/${slug}?preview=true`, '_blank');
+        }
+        
+        // Preview functions
+        function loadPreview() {
+            const cafe = cafes.find(c => c.id === managingCafeId);
+            if (!cafe) return;
+            
+            const iframe = document.getElementById('menuPreviewFrame');
+            iframe.src = `/menu/${cafe.slug}?preview=true`;
+        }
+        
+        function refreshPreview() {
+            const iframe = document.getElementById('menuPreviewFrame');
+            iframe.src = iframe.src;
+            showToast('Preview refreshed!', 'success');
+        }
+        
+        function openMenuInNewTab() {
+            const cafe = cafes.find(c => c.id === managingCafeId);
+            if (!cafe) return;
+            window.open(`/menu/${cafe.slug}?preview=true`, '_blank');
+        }
+        
+        // Delete cafe
+        async function deleteCafe(cafeId) {
+            if (!confirm('Are you sure you want to delete this café? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                await apiRequest(`/cafe/${cafeId}`, { method: 'DELETE' });
+                showToast('Café deleted successfully', 'success');
+                loadCafes();
+                loadDashboardData();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Delete owner
+        async function deleteOwner(ownerId) {
+            if (!confirm('Are you sure you want to delete this owner? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                await apiRequest(`/admin/owners/${ownerId}`, { method: 'DELETE' });
+                showToast('Owner deleted successfully', 'success');
+                loadOwners();
+                loadDashboardData();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Logout
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        }
+        
+        // Utility functions
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+        
+        function getActivityIcon(action) {
+            if (action.includes('created')) return '➕';
+            if (action.includes('updated')) return '✏️';
+            if (action.includes('deleted')) return '🗑️';
+            if (action.includes('published')) return '✅';
+            if (action.includes('login')) return '🔑';
+            return '📋';
+        }
+        
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `${type === 'success' ? '✓' : '✕'} ${escapeHtml(message)}`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        // Nav item clicks
+        document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(item.dataset.section);
+            });
+        });
+        
+        // Auto-generate slug
+        document.getElementById('cafeName')?.addEventListener('input', (e) => {
+            const slug = e.target.value
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+            document.getElementById('cafeSlug').value = slug;
+        });
+        
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+</html>
