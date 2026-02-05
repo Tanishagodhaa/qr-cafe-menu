@@ -10,19 +10,23 @@ const fs = require('fs');
 const QRCode = require('qrcode');
 const { getDb } = require('../database/init');
 const { authenticateToken, requireAdmin, requireCafeAccess } = require('../middleware/auth');
-const { extractFromGoogleLink, getSampleCafeMenu } = require('../services/googleExtractor');
 
-// File upload configuration
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = file.fieldname === 'logo' ? 'uploads/logos' : 'uploads/items';
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
+// Detect if running on Vercel (read-only filesystem)
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+
+// File upload configuration - use memory storage on Vercel
+const storage = isVercel 
+    ? multer.memoryStorage()
+    : multer.diskStorage({
+        destination: (req, file, cb) => {
+            const dir = file.fieldname === 'logo' ? 'uploads/logos' : 'uploads/items';
+            cb(null, dir);
+        },
+        filename: (req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            cb(null, uniqueSuffix + path.extname(file.originalname));
+        }
+    });
 
 const upload = multer({ 
     storage,
@@ -479,17 +483,7 @@ router.post('/:id/generate-qr', requireCafeAccess, async (req, res) => {
         
         const menuUrl = cafe.deployed_url || `${baseUrl}/m/${cafe.slug}`;
         
-        // Ensure directory exists
-        const qrDir = path.join(__dirname, '../uploads/qrcodes');
-        if (!fs.existsSync(qrDir)) {
-            fs.mkdirSync(qrDir, { recursive: true });
-        }
-        
-        const qrFilename = `${cafe.slug}-qr.png`;
-        const qrPath = path.join(qrDir, qrFilename);
-        
-        // Generate QR code
-        await QRCode.toFile(qrPath, menuUrl, {
+        const qrOptions = {
             width: 1024,
             margin: 2,
             color: {
@@ -497,9 +491,30 @@ router.post('/:id/generate-qr', requireCafeAccess, async (req, res) => {
                 light: '#FFFFFF'
             },
             errorCorrectionLevel: 'H'
-        });
+        };
         
-        const qrPublicPath = `/uploads/qrcodes/${qrFilename}`;
+        let qrPublicPath;
+        
+        // On Vercel: generate as data URL (no file system access)
+        // Locally: save to file
+        if (isVercel) {
+            // Return QR as data URL
+            const qrDataUrl = await QRCode.toDataURL(menuUrl, qrOptions);
+            qrPublicPath = qrDataUrl; // Store as data URL
+        } else {
+            // Ensure directory exists
+            const qrDir = path.join(__dirname, '../uploads/qrcodes');
+            if (!fs.existsSync(qrDir)) {
+                fs.mkdirSync(qrDir, { recursive: true });
+            }
+            
+            const qrFilename = `${cafe.slug}-qr.png`;
+            const qrPath = path.join(qrDir, qrFilename);
+            
+            // Generate QR code file
+            await QRCode.toFile(qrPath, menuUrl, qrOptions);
+            qrPublicPath = `/uploads/qrcodes/${qrFilename}`;
+        }
         
         // Update cafe with QR path
         db.prepare('UPDATE cafes SET qr_code_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')

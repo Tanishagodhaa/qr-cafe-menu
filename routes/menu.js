@@ -9,14 +9,19 @@ const path = require('path');
 const { getDb } = require('../database/init');
 const { authenticateToken, requireCafeAccess } = require('../middleware/auth');
 
-// File upload for menu item images
-const storage = multer.diskStorage({
-    destination: 'uploads/items',
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
+// Detect if running on Vercel (read-only filesystem)
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+
+// File upload for menu item images - use memory storage on Vercel
+const storage = isVercel
+    ? multer.memoryStorage()
+    : multer.diskStorage({
+        destination: 'uploads/items',
+        filename: (req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            cb(null, uniqueSuffix + path.extname(file.originalname));
+        }
+    });
 
 const upload = multer({ 
     storage,

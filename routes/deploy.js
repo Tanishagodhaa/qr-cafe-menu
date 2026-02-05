@@ -11,6 +11,9 @@ const { getDb } = require('../database/init');
 const { authenticateToken, requireCafeAccess, requireAdmin } = require('../middleware/auth');
 const { generateMenuHTML } = require('../services/menuGenerator');
 
+// Detect if running on Vercel (read-only filesystem)
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+
 router.use(authenticateToken);
 
 // Generate static files for a cafe
@@ -37,7 +40,30 @@ router.post('/:cafeId/generate', requireCafeAccess, async (req, res) => {
         // Generate HTML
         const html = generateMenuHTML(cafe, categories, items);
         
-        // Create deploy directory
+        // Determine base URL
+        const baseUrl = process.env.VERCEL_URL 
+            ? `https://${process.env.VERCEL_URL}` 
+            : (process.env.BASE_URL || 'http://localhost:3000');
+        
+        // On Vercel, just update the database with the menu URL (no file writes)
+        if (isVercel) {
+            const menuUrl = `${baseUrl}/m/${cafe.slug}`;
+            
+            db.prepare('UPDATE cafes SET is_deployed = 1, deployed_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+                .run(menuUrl, cafeId);
+            
+            db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+                .run(req.user.id, cafeId, 'generate_deploy', 'Menu URL generated (Vercel mode)');
+            
+            return res.json({
+                success: true,
+                deployedUrl: menuUrl,
+                previewUrl: `/m/${cafe.slug}`,
+                note: 'Running on Vercel - menu served dynamically'
+            });
+        }
+        
+        // Local mode: Create deploy directory and files
         const deployDir = path.join(__dirname, '../deployed', cafe.slug);
         if (!fs.existsSync(deployDir)) {
             fs.mkdirSync(deployDir, { recursive: true });
@@ -53,7 +79,7 @@ router.post('/:cafeId/generate', requireCafeAccess, async (req, res) => {
         }
         
         // Update cafe
-        const localUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/deployed/${cafe.slug}`;
+        const localUrl = `${baseUrl}/deployed/${cafe.slug}`;
         
         db.prepare('UPDATE cafes SET is_deployed = 1, deployed_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
             .run(localUrl, cafeId);
@@ -76,6 +102,14 @@ router.post('/:cafeId/generate', requireCafeAccess, async (req, res) => {
 // Download deployment package
 router.get('/:cafeId/download', requireCafeAccess, async (req, res) => {
     try {
+        // Download not available on Vercel (no file system)
+        if (isVercel) {
+            return res.status(400).json({ 
+                error: 'Download not available in cloud mode. Use the menu URL directly.',
+                note: 'Vercel serves menus dynamically - no static files to download'
+            });
+        }
+        
         const { cafeId } = req.params;
         const db = await getDb();
         
@@ -116,14 +150,19 @@ router.get('/:cafeId/status', requireCafeAccess, async (req, res) => {
             return res.status(404).json({ error: 'Cafe not found' });
         }
         
-        const deployDir = path.join(__dirname, '../deployed', cafe.slug);
-        const filesExist = fs.existsSync(path.join(deployDir, 'index.html'));
+        // On Vercel, files are served dynamically
+        let filesExist = false;
+        if (!isVercel) {
+            const deployDir = path.join(__dirname, '../deployed', cafe.slug);
+            filesExist = fs.existsSync(path.join(deployDir, 'index.html'));
+        }
         
         res.json({
             isDeployed: !!cafe.is_deployed,
             deployedUrl: cafe.deployed_url,
             previewUrl: `/m/${cafe.slug}`,
-            filesGenerated: filesExist
+            filesGenerated: isVercel ? true : filesExist,
+            mode: isVercel ? 'cloud' : 'local'
         });
     } catch (error) {
         console.error('Status error:', error);

@@ -20,14 +20,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/deployed', express.static(path.join(__dirname, 'deployed')));
 
-// Ensure directories exist
-const dirs = ['uploads', 'uploads/logos', 'uploads/items', 'deployed', 'database'];
-dirs.forEach(dir => {
-    const dirPath = path.join(__dirname, dir);
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive: true });
-    }
-});
+// Detect if running on Vercel (read-only filesystem)
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+
+// Ensure directories exist (only on local, Vercel has read-only filesystem)
+if (!isVercel) {
+    const dirs = ['uploads', 'uploads/logos', 'uploads/items', 'uploads/qrcodes', 'deployed', 'database'];
+    dirs.forEach(dir => {
+        const dirPath = path.join(__dirname, dir);
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
+    });
+}
 
 // Import routes
 const authRoutes = require('./routes/auth');

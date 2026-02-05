@@ -2,6 +2,7 @@
  * Database Initialization
  * Creates tables and default admin user
  * Using sql.js (SQLite compiled to WebAssembly - no native compilation needed)
+ * Works with Vercel serverless (in-memory) or local (file-based)
  */
 
 const initSqlJs = require('sql.js');
@@ -9,6 +10,8 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 
+// Detect if running on Vercel (read-only filesystem)
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
 const dbPath = path.join(__dirname, 'qrmenu.db');
 
 let db = null;
@@ -21,8 +24,9 @@ async function getDb() {
         SQL = await initSqlJs();
     }
     
-    // Try to load existing database
-    if (fs.existsSync(dbPath)) {
+    // On Vercel: use in-memory database
+    // Locally: try to load from file
+    if (!isVercel && fs.existsSync(dbPath)) {
         const buffer = fs.readFileSync(dbPath);
         db = new SQL.Database(buffer);
     } else {
@@ -33,10 +37,15 @@ async function getDb() {
 }
 
 function saveDb() {
-    if (db) {
-        const data = db.export();
-        const buffer = Buffer.from(data);
-        fs.writeFileSync(dbPath, buffer);
+    // Only save to file if not on Vercel (Vercel has read-only filesystem)
+    if (!isVercel && db) {
+        try {
+            const data = db.export();
+            const buffer = Buffer.from(data);
+            fs.writeFileSync(dbPath, buffer);
+        } catch (e) {
+            console.log('Note: Could not save database to file (read-only filesystem)');
+        }
     }
 }
 
