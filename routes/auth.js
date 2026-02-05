@@ -21,7 +21,7 @@ router.post('/login', async (req, res) => {
         }
         
         const db = await getDb();
-        const user = db.prepare('SELECT * FROM users WHERE email = ? AND is_active = 1').get(email);
+        const user = await db.prepare('SELECT * FROM users WHERE email = ? AND is_active = 1').get(email);
         
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
@@ -41,7 +41,7 @@ router.post('/login', async (req, res) => {
         );
         
         // Log activity
-        db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)')
+        await db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)')
             .run(user.id, 'login', `User logged in from ${req.ip}`);
         
         res.json({
@@ -66,7 +66,7 @@ router.get('/me', authenticateToken, async (req, res) => {
     let cafe = null;
     
     if (req.user.cafe_id) {
-        cafe = db.prepare('SELECT id, name, slug, logo FROM cafes WHERE id = ?').get(req.user.cafe_id);
+        cafe = await db.prepare('SELECT id, name, slug, logo FROM cafes WHERE id = ?').get(req.user.cafe_id);
     }
     
     res.json({
@@ -99,7 +99,7 @@ router.post('/change-password', authenticateToken, async (req, res) => {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         
         const db = await getDb();
-        db.prepare('UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+        await db.prepare('UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
             .run(hashedPassword, req.user.id);
         
         res.json({ success: true, message: 'Password changed successfully' });

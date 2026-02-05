@@ -9,22 +9,29 @@
     "init-db": "node scripts/initDb.js",
     "create-admin": "node scripts/createAdmin.js"
   },
-  "keywords": ["qr-code", "menu", "cafe", "restaurant", "saas"],
+  "keywords": [
+    "qr-code",
+    "menu",
+    "cafe",
+    "restaurant",
+    "saas"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "sql.js": "^1.10.3",
+    "@libsql/client": "^0.17.0",
+    "archiver": "^6.0.1",
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "qrcode": "^1.5.3",
+    "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "puppeteer": "^21.6.1",
-    "cheerio": "^1.0.0-rc.12",
-    "archiver": "^6.0.1",
-    "uuid": "^9.0.0",
-    "dotenv": "^16.3.1"
+    "qrcode": "^1.5.3",
+    "sql.js": "^1.10.3",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

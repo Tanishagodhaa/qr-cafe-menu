@@ -14,7 +14,7 @@ router.get('/menu/:slug', async (req, res) => {
         const db = await getDb();
         
         // Get cafe - allow unpublished if preview=true
-        const cafe = db.prepare(`
+        const cafe = await db.prepare(`
             SELECT id, name, slug, tagline, description, logo, cover_image,
                    phone, email, address, website, instagram, facebook, currency,
                    primary_color, secondary_color, accent_color, background_color, text_color,
@@ -33,7 +33,7 @@ router.get('/menu/:slug', async (req, res) => {
         }
         
         // Get categories
-        const categories = db.prepare(`
+        const categories = await db.prepare(`
             SELECT id, name, icon, description
             FROM categories 
             WHERE cafe_id = ? AND is_active = 1
@@ -41,7 +41,7 @@ router.get('/menu/:slug', async (req, res) => {
         `).all(cafe.id);
         
         // Get items
-        const items = db.prepare(`
+        const items = await db.prepare(`
             SELECT id, category_id, name, description, price, original_price, image,
                    calories, is_vegan, is_vegetarian, is_gluten_free, is_spicy,
                    is_bestseller, is_new
@@ -96,7 +96,7 @@ router.get('/check-slug/:slug', async (req, res) => {
         const { slug } = req.params;
         const db = await getDb();
         
-        const existing = db.prepare('SELECT id FROM cafes WHERE slug = ?').get(slug);
+        const existing = await db.prepare('SELECT id FROM cafes WHERE slug = ?').get(slug);
         
         res.json({ available: !existing });
     } catch (error) {

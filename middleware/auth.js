@@ -21,7 +21,7 @@ async function authenticateToken(req, res, next) {
         
         // Get fresh user data
         const db = await getDb();
-        const dbUser = db.prepare('SELECT * FROM users WHERE id = ? AND is_active = 1').get(user.id);
+        const dbUser = await db.prepare('SELECT * FROM users WHERE id = ? AND is_active = 1').get(user.id);
         
         if (!dbUser) {
             return res.status(403).json({ error: 'User not found or inactive' });

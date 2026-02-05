@@ -23,17 +23,17 @@ router.post('/:cafeId/generate', requireCafeAccess, async (req, res) => {
         const db = await getDb();
         
         // Get cafe data
-        const cafe = db.prepare('SELECT * FROM cafes WHERE id = ?').get(cafeId);
+        const cafe = await db.prepare('SELECT * FROM cafes WHERE id = ?').get(cafeId);
         if (!cafe) {
             return res.status(404).json({ error: 'Cafe not found' });
         }
         
         // Get categories and items
-        const categories = db.prepare(`
+        const categories = await db.prepare(`
             SELECT * FROM categories WHERE cafe_id = ? AND is_active = 1 ORDER BY sort_order
         `).all(cafeId);
         
-        const items = db.prepare(`
+        const items = await db.prepare(`
             SELECT * FROM menu_items WHERE cafe_id = ? AND is_available = 1 ORDER BY sort_order
         `).all(cafeId);
         
@@ -49,10 +49,10 @@ router.post('/:cafeId/generate', requireCafeAccess, async (req, res) => {
         if (isVercel) {
             const menuUrl = `${baseUrl}/m/${cafe.slug}`;
             
-            db.prepare('UPDATE cafes SET is_deployed = 1, deployed_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+            await db.prepare('UPDATE cafes SET is_deployed = 1, deployed_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
                 .run(menuUrl, cafeId);
             
-            db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+            await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
                 .run(req.user.id, cafeId, 'generate_deploy', 'Menu URL generated (Vercel mode)');
             
             return res.json({
@@ -81,11 +81,11 @@ router.post('/:cafeId/generate', requireCafeAccess, async (req, res) => {
         // Update cafe
         const localUrl = `${baseUrl}/deployed/${cafe.slug}`;
         
-        db.prepare('UPDATE cafes SET is_deployed = 1, deployed_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+        await db.prepare('UPDATE cafes SET is_deployed = 1, deployed_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
             .run(localUrl, cafeId);
         
         // Log activity
-        db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+        await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
             .run(req.user.id, cafeId, 'generate_deploy', 'Generated deployment files');
         
         res.json({
@@ -113,7 +113,7 @@ router.get('/:cafeId/download', requireCafeAccess, async (req, res) => {
         const { cafeId } = req.params;
         const db = await getDb();
         
-        const cafe = db.prepare('SELECT * FROM cafes WHERE id = ?').get(cafeId);
+        const cafe = await db.prepare('SELECT * FROM cafes WHERE id = ?').get(cafeId);
         if (!cafe) {
             return res.status(404).json({ error: 'Cafe not found' });
         }
@@ -144,7 +144,7 @@ router.get('/:cafeId/status', requireCafeAccess, async (req, res) => {
         const { cafeId } = req.params;
         const db = await getDb();
         
-        const cafe = db.prepare('SELECT is_deployed, deployed_url, slug FROM cafes WHERE id = ?').get(cafeId);
+        const cafe = await db.prepare('SELECT is_deployed, deployed_url, slug FROM cafes WHERE id = ?').get(cafeId);
         
         if (!cafe) {
             return res.status(404).json({ error: 'Cafe not found' });

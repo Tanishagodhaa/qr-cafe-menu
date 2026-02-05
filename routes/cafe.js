@@ -45,6 +45,37 @@ const upload = multer({
 
 router.use(authenticateToken);
 
+// Get sample menu function
+function getSampleCafeMenu() {
+    return [
+        {
+            name: 'Hot Drinks',
+            icon: '☕',
+            items: [
+                { name: 'Espresso', description: 'Rich and bold', price: 3.50 },
+                { name: 'Cappuccino', description: 'With steamed milk foam', price: 4.50 },
+                { name: 'Latte', description: 'Smooth and creamy', price: 4.50 }
+            ]
+        },
+        {
+            name: 'Cold Drinks',
+            icon: '🧊',
+            items: [
+                { name: 'Iced Coffee', description: 'Refreshing cold brew', price: 4.00 },
+                { name: 'Iced Latte', description: 'Cold and creamy', price: 5.00 }
+            ]
+        },
+        {
+            name: 'Pastries',
+            icon: '🥐',
+            items: [
+                { name: 'Croissant', description: 'Buttery and flaky', price: 3.00 },
+                { name: 'Muffin', description: 'Fresh baked daily', price: 3.50 }
+            ]
+        }
+    ];
+}
+
 // Generate unique slug
 async function generateSlug(name) {
     const db = await getDb();
@@ -56,9 +87,11 @@ async function generateSlug(name) {
     const original = slug;
     let counter = 1;
     
-    while (db.prepare('SELECT id FROM cafes WHERE slug = ?').get(slug)) {
+    let existing = await db.prepare('SELECT id FROM cafes WHERE slug = ?').get(slug);
+    while (existing) {
         slug = `${original}-${counter}`;
         counter++;
+        existing = await db.prepare('SELECT id FROM cafes WHERE slug = ?').get(slug);
     }
     
     return slug;
@@ -71,20 +104,12 @@ router.get('/', async (req, res) => {
         
         let cafes;
         if (req.user.role === 'admin') {
-            cafes = db.prepare(`
-                SELECT c.*, 
-                       (SELECT COUNT(*) FROM categories WHERE cafe_id = c.id) as category_count,
-                       (SELECT COUNT(*) FROM menu_items WHERE cafe_id = c.id) as item_count
-                FROM cafes c
-                ORDER BY c.created_at DESC
+            cafes = await db.prepare(`
+                SELECT * FROM cafes ORDER BY created_at DESC
             `).all();
         } else {
-            cafes = db.prepare(`
-                SELECT c.*,
-                       (SELECT COUNT(*) FROM categories WHERE cafe_id = c.id) as category_count,
-                       (SELECT COUNT(*) FROM menu_items WHERE cafe_id = c.id) as item_count
-                FROM cafes c
-                WHERE c.id = ?
+            cafes = await db.prepare(`
+                SELECT * FROM cafes WHERE id = ?
             `).all(req.user.cafe_id);
         }
         
@@ -99,7 +124,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', requireCafeAccess, async (req, res) => {
     try {
         const db = await getDb();
-        const cafe = db.prepare('SELECT * FROM cafes WHERE id = ?').get(req.params.id);
+        const cafe = await db.prepare('SELECT * FROM cafes WHERE id = ?').get(req.params.id);
         
         if (!cafe) {
             return res.status(404).json({ error: 'Cafe not found' });
@@ -209,7 +234,7 @@ router.post('/manual', requireAdmin, upload.single('logo'), async (req, res) => 
         const slug = await generateSlug(name);
         const logo = req.file ? `/uploads/logos/${req.file.filename}` : null;
         
-        const result = db.prepare(`
+        const result = await db.prepare(`
             INSERT INTO cafes (name, slug, tagline, description, phone, email, address, currency, logo, created_by)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(name, slug, tagline || '', description || '', phone || '', email || '', address || '', currency || '$', logo, req.user.id);
@@ -217,7 +242,7 @@ router.post('/manual', requireAdmin, upload.single('logo'), async (req, res) => 
         const cafeId = result.lastInsertRowid;
         
         // Log activity
-        db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+        await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
             .run(req.user.id, cafeId, 'create_cafe', `Created cafe manually: ${name}`);
         
         res.json({
@@ -315,7 +340,7 @@ router.post('/:id/sample-menu', requireCafeAccess, async (req, res) => {
         const db = await getDb();
         
         // Check cafe exists
-        const cafe = db.prepare('SELECT * FROM cafes WHERE id = ?').get(cafeId);
+        const cafe = await db.prepare('SELECT * FROM cafes WHERE id = ?').get(cafeId);
         if (!cafe) {
             return res.status(404).json({ error: 'Cafe not found' });
         }
@@ -327,12 +352,12 @@ router.post('/:id/sample-menu', requireCafeAccess, async (req, res) => {
         let categoriesAdded = 0;
         
         // Get current max sort order for categories
-        const maxCatOrder = db.prepare('SELECT MAX(sort_order) as max FROM categories WHERE cafe_id = ?').get(cafeId);
+        const maxCatOrder = await db.prepare('SELECT MAX(sort_order) as max FROM categories WHERE cafe_id = ?').get(cafeId);
         let catSortOrder = (maxCatOrder?.max || 0) + 1;
         
-        sampleMenu.forEach((cat) => {
+        for (const cat of sampleMenu) {
             // Insert category
-            const insertCatResult = db.prepare(`
+            const insertCatResult = await db.prepare(`
                 INSERT INTO categories (cafe_id, name, icon, sort_order)
                 VALUES (?, ?, ?, ?)
             `).run(cafeId, cat.name, cat.icon || '🍽️', catSortOrder++);
@@ -342,19 +367,20 @@ router.post('/:id/sample-menu', requireCafeAccess, async (req, res) => {
             categoriesAdded++;
             
             if (cat.items && cat.items.length > 0) {
-                cat.items.forEach((item, itemIndex) => {
-                    db.prepare(`
+                for (let itemIndex = 0; itemIndex < cat.items.length; itemIndex++) {
+                    const item = cat.items[itemIndex];
+                    await db.prepare(`
                         INSERT INTO menu_items (cafe_id, category_id, name, description, price, sort_order)
                         VALUES (?, ?, ?, ?, ?, ?)
                     `).run(cafeId, categoryId, item.name, item.description || '', item.price || 0, itemIndex);
                     console.log(`  Inserted item "${item.name}" into category ${categoryId}`);
                     itemsAdded++;
-                });
+                }
             }
-        });
+        }
         
         // Log activity
-        db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+        await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
             .run(req.user.id, cafeId, 'add_sample_menu', `Added sample menu with ${itemsAdded} items`);
         
         res.json({
@@ -375,7 +401,7 @@ router.put('/:id', requireCafeAccess, upload.single('logo'), async (req, res) =>
         const { id } = req.params;
         const db = await getDb();
         
-        const cafe = db.prepare('SELECT * FROM cafes WHERE id = ?').get(id);
+        const cafe = await db.prepare('SELECT * FROM cafes WHERE id = ?').get(id);
         if (!cafe) {
             return res.status(404).json({ error: 'Cafe not found' });
         }
@@ -393,8 +419,8 @@ router.put('/:id', requireCafeAccess, upload.single('logo'), async (req, res) =>
                               is_published === false || is_published === 'false' || is_published === 0 ? 0 : 
                               cafe.is_published;
         
-        // Use existing values if undefined (sql.js doesn't handle undefined well)
-        db.prepare(`
+        // Use existing values if undefined
+        await db.prepare(`
             UPDATE cafes SET
                 name = ?,
                 tagline = ?,
@@ -437,7 +463,7 @@ router.put('/:id', requireCafeAccess, upload.single('logo'), async (req, res) =>
         );
         
         // Log activity
-        db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+        await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
             .run(req.user.id, id, 'update_cafe', 'Updated cafe details');
         
         res.json({ success: true, message: 'Cafe updated' });
@@ -455,7 +481,7 @@ router.post('/:id/publish', requireCafeAccess, async (req, res) => {
         
         const db = await getDb();
         
-        db.prepare('UPDATE cafes SET is_published = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+        await db.prepare('UPDATE cafes SET is_published = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
             .run(publish ? 1 : 0, id);
         
         res.json({ success: true, isPublished: !!publish });
@@ -471,7 +497,7 @@ router.post('/:id/generate-qr', requireCafeAccess, async (req, res) => {
         const { id } = req.params;
         const db = await getDb();
         
-        const cafe = db.prepare('SELECT * FROM cafes WHERE id = ?').get(id);
+        const cafe = await db.prepare('SELECT * FROM cafes WHERE id = ?').get(id);
         if (!cafe) {
             return res.status(404).json({ error: 'Cafe not found' });
         }
@@ -517,7 +543,7 @@ router.post('/:id/generate-qr', requireCafeAccess, async (req, res) => {
         }
         
         // Update cafe with QR path
-        db.prepare('UPDATE cafes SET qr_code_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+        await db.prepare('UPDATE cafes SET qr_code_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
             .run(qrPublicPath, id);
         
         res.json({
@@ -538,17 +564,17 @@ router.delete('/:id', requireAdmin, async (req, res) => {
         const db = await getDb();
         
         // Get cafe for logging
-        const cafe = db.prepare('SELECT name FROM cafes WHERE id = ?').get(id);
+        const cafe = await db.prepare('SELECT name FROM cafes WHERE id = ?').get(id);
         
         // Delete all related data (cascade)
-        db.prepare('DELETE FROM menu_items WHERE cafe_id = ?').run(id);
-        db.prepare('DELETE FROM categories WHERE cafe_id = ?').run(id);
-        db.prepare('UPDATE users SET cafe_id = NULL WHERE cafe_id = ?').run(id);
-        db.prepare('DELETE FROM cafes WHERE id = ?').run(id);
+        await db.prepare('DELETE FROM menu_items WHERE cafe_id = ?').run(id);
+        await db.prepare('DELETE FROM categories WHERE cafe_id = ?').run(id);
+        await db.prepare('UPDATE users SET cafe_id = NULL WHERE cafe_id = ?').run(id);
+        await db.prepare('DELETE FROM cafes WHERE id = ?').run(id);
         
         // Log activity
         if (cafe) {
-            db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)')
+            await db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)')
                 .run(req.user.id, 'delete_cafe', `Deleted cafe: ${cafe.name}`);
         }
         

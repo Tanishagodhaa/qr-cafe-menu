@@ -46,23 +46,22 @@ router.use(authenticateToken);
 router.get('/:cafeId/full', requireCafeAccess, async (req, res) => {
     try {
         const db = await getDb();
-        const categories = db.prepare(`
+        const categories = await db.prepare(`
             SELECT * FROM categories
             WHERE cafe_id = ?
             ORDER BY sort_order ASC, id ASC
         `).all(req.params.cafeId);
         
         // Get items for each category
-        const getItems = db.prepare(`
-            SELECT * FROM menu_items
-            WHERE category_id = ?
-            ORDER BY sort_order ASC, id ASC
-        `);
-        
-        const fullMenu = categories.map(cat => ({
-            ...cat,
-            items: getItems.all(cat.id)
-        }));
+        const fullMenu = [];
+        for (const cat of categories) {
+            const items = await db.prepare(`
+                SELECT * FROM menu_items
+                WHERE category_id = ?
+                ORDER BY sort_order ASC, id ASC
+            `).all(cat.id);
+            fullMenu.push({ ...cat, items });
+        }
         
         res.json({ categories: fullMenu });
     } catch (error) {
@@ -75,12 +74,10 @@ router.get('/:cafeId/full', requireCafeAccess, async (req, res) => {
 router.get('/:cafeId/categories', requireCafeAccess, async (req, res) => {
     try {
         const db = await getDb();
-        const categories = db.prepare(`
-            SELECT c.*, 
-                   (SELECT COUNT(*) FROM menu_items WHERE category_id = c.id) as item_count
-            FROM categories c
-            WHERE c.cafe_id = ?
-            ORDER BY c.sort_order ASC, c.id ASC
+        const categories = await db.prepare(`
+            SELECT * FROM categories
+            WHERE cafe_id = ?
+            ORDER BY sort_order ASC, id ASC
         `).all(req.params.cafeId);
         
         res.json(categories);
@@ -103,16 +100,16 @@ router.post('/:cafeId/categories', requireCafeAccess, async (req, res) => {
         const db = await getDb();
         
         // Get max sort order
-        const maxOrder = db.prepare('SELECT MAX(sort_order) as max FROM categories WHERE cafe_id = ?').get(cafeId);
+        const maxOrder = await db.prepare('SELECT MAX(sort_order) as max FROM categories WHERE cafe_id = ?').get(cafeId);
         const sortOrder = (maxOrder?.max || 0) + 1;
         
-        const result = db.prepare(`
+        const result = await db.prepare(`
             INSERT INTO categories (cafe_id, name, icon, description, sort_order)
             VALUES (?, ?, ?, ?, ?)
         `).run(cafeId, name, icon || '🍽️', description || '', sortOrder);
         
         // Log activity
-        db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+        await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
             .run(req.user.id, cafeId, 'add_category', `Added category: ${name}`);
         
         res.json({
@@ -139,7 +136,7 @@ router.put('/:cafeId/categories/:categoryId', requireCafeAccess, async (req, res
         
         const db = await getDb();
         
-        db.prepare(`
+        await db.prepare(`
             UPDATE categories SET
                 name = COALESCE(?, name),
                 icon = COALESCE(?, icon),
@@ -163,11 +160,11 @@ router.post('/:cafeId/categories/reorder', requireCafeAccess, async (req, res) =
         const { order } = req.body; // Array of category IDs in new order
         
         const db = await getDb();
-        const updateStmt = db.prepare('UPDATE categories SET sort_order = ? WHERE id = ? AND cafe_id = ?');
         
-        order.forEach((categoryId, index) => {
-            updateStmt.run(index, categoryId, cafeId);
-        });
+        for (let index = 0; index < order.length; index++) {
+            await db.prepare('UPDATE categories SET sort_order = ? WHERE id = ? AND cafe_id = ?')
+                .run(index, order[index], cafeId);
+        }
         
         res.json({ success: true, message: 'Categories reordered' });
     } catch (error) {
@@ -183,17 +180,17 @@ router.delete('/:cafeId/categories/:categoryId', requireCafeAccess, async (req, 
         const db = await getDb();
         
         // Get category for logging
-        const category = db.prepare('SELECT name FROM categories WHERE id = ?').get(categoryId);
+        const category = await db.prepare('SELECT name FROM categories WHERE id = ?').get(categoryId);
         
         // Delete items in category first
-        db.prepare('DELETE FROM menu_items WHERE category_id = ?').run(categoryId);
+        await db.prepare('DELETE FROM menu_items WHERE category_id = ?').run(categoryId);
         
         // Delete category
-        db.prepare('DELETE FROM categories WHERE id = ? AND cafe_id = ?').run(categoryId, cafeId);
+        await db.prepare('DELETE FROM categories WHERE id = ? AND cafe_id = ?').run(categoryId, cafeId);
         
         // Log activity
         if (category) {
-            db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+            await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
                 .run(req.user.id, cafeId, 'delete_category', `Deleted category: ${category.name}`);
         }
         
@@ -212,7 +209,7 @@ router.delete('/:cafeId/categories/:categoryId', requireCafeAccess, async (req, 
 router.get('/:cafeId/items', requireCafeAccess, async (req, res) => {
     try {
         const db = await getDb();
-        const items = db.prepare(`
+        const items = await db.prepare(`
             SELECT mi.*, c.name as category_name
             FROM menu_items mi
             JOIN categories c ON mi.category_id = c.id
@@ -231,7 +228,7 @@ router.get('/:cafeId/items', requireCafeAccess, async (req, res) => {
 router.get('/:cafeId/categories/:categoryId/items', requireCafeAccess, async (req, res) => {
     try {
         const db = await getDb();
-        const items = db.prepare(`
+        const items = await db.prepare(`
             SELECT * FROM menu_items
             WHERE cafe_id = ? AND category_id = ?
             ORDER BY sort_order ASC
@@ -250,7 +247,7 @@ router.get('/:cafeId/items/:itemId', requireCafeAccess, async (req, res) => {
         const { cafeId, itemId } = req.params;
         const db = await getDb();
         
-        const item = db.prepare(`
+        const item = await db.prepare(`
             SELECT * FROM menu_items
             WHERE id = ? AND cafe_id = ?
         `).get(itemId, cafeId);
@@ -279,10 +276,10 @@ router.post('/:cafeId/categories/:categoryId/items', requireCafeAccess, async (r
         const db = await getDb();
         
         // Get max sort order
-        const maxOrder = db.prepare('SELECT MAX(sort_order) as max FROM menu_items WHERE category_id = ?').get(categoryId);
+        const maxOrder = await db.prepare('SELECT MAX(sort_order) as max FROM menu_items WHERE category_id = ?').get(categoryId);
         const sortOrder = (maxOrder?.max || 0) + 1;
         
-        const result = db.prepare(`
+        const result = await db.prepare(`
             INSERT INTO menu_items (
                 cafe_id, category_id, name, description, price, 
                 is_vegetarian, is_spicy, is_popular, sort_order
@@ -295,7 +292,7 @@ router.post('/:cafeId/categories/:categoryId/items', requireCafeAccess, async (r
         );
         
         // Log activity
-        db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+        await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
             .run(req.user.id, cafeId, 'add_item', `Added item: ${name}`);
         
         res.json({
@@ -324,12 +321,12 @@ router.post('/:cafeId/items', requireCafeAccess, upload.single('image'), async (
         const db = await getDb();
         
         // Get max sort order
-        const maxOrder = db.prepare('SELECT MAX(sort_order) as max FROM menu_items WHERE category_id = ?').get(categoryId);
+        const maxOrder = await db.prepare('SELECT MAX(sort_order) as max FROM menu_items WHERE category_id = ?').get(categoryId);
         const sortOrder = (maxOrder?.max || 0) + 1;
         
         const image = req.file ? `/uploads/items/${req.file.filename}` : null;
         
-        const result = db.prepare(`
+        const result = await db.prepare(`
             INSERT INTO menu_items (
                 cafe_id, category_id, name, description, price, original_price,
                 image, calories, is_vegan, is_vegetarian, is_gluten_free, is_spicy,
@@ -346,7 +343,7 @@ router.post('/:cafeId/items', requireCafeAccess, upload.single('image'), async (
         );
         
         // Log activity
-        db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+        await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
             .run(req.user.id, cafeId, 'add_item', `Added item: ${name}`);
         
         res.json({
@@ -372,7 +369,7 @@ router.put('/:cafeId/items/:itemId', requireCafeAccess, upload.single('image'), 
         const db = await getDb();
         
         // Get current item for image
-        const currentItem = db.prepare('SELECT image FROM menu_items WHERE id = ?').get(itemId);
+        const currentItem = await db.prepare('SELECT image FROM menu_items WHERE id = ?').get(itemId);
         const image = req.file ? `/uploads/items/${req.file.filename}` : currentItem?.image;
         
         // Handle both naming conventions (camelCase and snake_case)
@@ -380,7 +377,7 @@ router.put('/:cafeId/items/:itemId', requireCafeAccess, upload.single('image'), 
         const spicyValue = is_spicy !== undefined ? is_spicy : isSpicy;
         const popularValue = is_popular !== undefined ? is_popular : isBestseller;
         
-        db.prepare(`
+        await db.prepare(`
             UPDATE menu_items SET
                 category_id = COALESCE(?, category_id),
                 name = COALESCE(?, name),
@@ -429,7 +426,7 @@ router.patch('/:cafeId/items/:itemId/toggle', requireCafeAccess, async (req, res
         const { cafeId, itemId } = req.params;
         const db = await getDb();
         
-        const item = db.prepare('SELECT is_available FROM menu_items WHERE id = ? AND cafe_id = ?').get(itemId, cafeId);
+        const item = await db.prepare('SELECT is_available FROM menu_items WHERE id = ? AND cafe_id = ?').get(itemId, cafeId);
         
         if (!item) {
             return res.status(404).json({ error: 'Item not found' });
@@ -437,7 +434,7 @@ router.patch('/:cafeId/items/:itemId/toggle', requireCafeAccess, async (req, res
         
         const newStatus = item.is_available ? 0 : 1;
         
-        db.prepare('UPDATE menu_items SET is_available = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+        await db.prepare('UPDATE menu_items SET is_available = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
             .run(newStatus, itemId);
         
         res.json({ success: true, isAvailable: !!newStatus });
@@ -454,11 +451,12 @@ router.post('/:cafeId/items/reorder', requireCafeAccess, async (req, res) => {
         const { order } = req.body; // Array of item IDs in new order
         
         const db = await getDb();
-        const updateStmt = db.prepare('UPDATE menu_items SET sort_order = ? WHERE id = ? AND cafe_id = ?');
         
-        order.forEach((itemId, index) => {
-            updateStmt.run(index, itemId, cafeId);
-        });
+        for (let index = 0; index < order.length; index++) {
+            const itemId = order[index];
+            await db.prepare('UPDATE menu_items SET sort_order = ? WHERE id = ? AND cafe_id = ?')
+                .run(index, itemId, cafeId);
+        }
         
         res.json({ success: true, message: 'Items reordered' });
     } catch (error) {
@@ -474,13 +472,13 @@ router.delete('/:cafeId/items/:itemId', requireCafeAccess, async (req, res) => {
         const db = await getDb();
         
         // Get item for logging
-        const item = db.prepare('SELECT name FROM menu_items WHERE id = ?').get(itemId);
+        const item = await db.prepare('SELECT name FROM menu_items WHERE id = ?').get(itemId);
         
-        db.prepare('DELETE FROM menu_items WHERE id = ? AND cafe_id = ?').run(itemId, cafeId);
+        await db.prepare('DELETE FROM menu_items WHERE id = ? AND cafe_id = ?').run(itemId, cafeId);
         
         // Log activity
         if (item) {
-            db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+            await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
                 .run(req.user.id, cafeId, 'delete_item', `Deleted item: ${item.name}`);
         }
         
@@ -503,26 +501,24 @@ router.post('/:cafeId/items/bulk', requireCafeAccess, async (req, res) => {
         
         const db = await getDb();
         
-        const insertStmt = db.prepare(`
-            INSERT INTO menu_items (cafe_id, category_id, name, description, price, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `);
-        
-        const maxOrder = db.prepare('SELECT MAX(sort_order) as max FROM menu_items WHERE category_id = ?').get(categoryId);
+        const maxOrder = await db.prepare('SELECT MAX(sort_order) as max FROM menu_items WHERE category_id = ?').get(categoryId);
         let sortOrder = (maxOrder?.max || 0) + 1;
         
         const insertedIds = [];
         
-        items.forEach(item => {
-            const result = insertStmt.run(
+        for (const item of items) {
+            const result = await db.prepare(`
+                INSERT INTO menu_items (cafe_id, category_id, name, description, price, sort_order)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `).run(
                 cafeId, categoryId, item.name, item.description || '',
                 item.price ? parseFloat(item.price) : null, sortOrder++
             );
             insertedIds.push(result.lastInsertRowid);
-        });
+        }
         
         // Log activity
-        db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
+        await db.prepare('INSERT INTO activity_log (user_id, cafe_id, action, details) VALUES (?, ?, ?, ?)')
             .run(req.user.id, cafeId, 'bulk_add_items', `Added ${items.length} items`);
         
         res.json({ success: true, insertedIds });

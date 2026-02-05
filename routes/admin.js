@@ -18,15 +18,22 @@ router.get('/stats', async (req, res) => {
     try {
         const db = await getDb();
         
-        const totalCafes = db.prepare('SELECT COUNT(*) as count FROM cafes').get().count;
-        const publishedCafes = db.prepare('SELECT COUNT(*) as count FROM cafes WHERE is_published = 1').get().count;
-        const deployedCafes = db.prepare('SELECT COUNT(*) as count FROM cafes WHERE is_deployed = 1').get().count;
-        const totalOwners = db.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'owner'").get().count;
-        const totalItems = db.prepare('SELECT COUNT(*) as count FROM menu_items').get().count;
-        const totalCategories = db.prepare('SELECT COUNT(*) as count FROM categories').get().count;
+        const totalCafesResult = await db.prepare('SELECT COUNT(*) as count FROM cafes').get();
+        const publishedCafesResult = await db.prepare('SELECT COUNT(*) as count FROM cafes WHERE is_published = 1').get();
+        const deployedCafesResult = await db.prepare('SELECT COUNT(*) as count FROM cafes WHERE is_deployed = 1').get();
+        const totalOwnersResult = await db.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'owner'").get();
+        const totalItemsResult = await db.prepare('SELECT COUNT(*) as count FROM menu_items').get();
+        const totalCategoriesResult = await db.prepare('SELECT COUNT(*) as count FROM categories').get();
+        
+        const totalCafes = totalCafesResult?.count || 0;
+        const publishedCafes = publishedCafesResult?.count || 0;
+        const deployedCafes = deployedCafesResult?.count || 0;
+        const totalOwners = totalOwnersResult?.count || 0;
+        const totalItems = totalItemsResult?.count || 0;
+        const totalCategories = totalCategoriesResult?.count || 0;
         
         // Recent activity
-        const recentActivity = db.prepare(`
+        const recentActivity = await db.prepare(`
             SELECT al.*, u.name as user_name, c.name as cafe_name
             FROM activity_log al
             LEFT JOIN users u ON al.user_id = u.id
@@ -36,7 +43,7 @@ router.get('/stats', async (req, res) => {
         `).all();
         
         // Recent cafes
-        const recentCafes = db.prepare(`
+        const recentCafes = await db.prepare(`
             SELECT c.*, u.name as owner_name
             FROM cafes c
             LEFT JOIN users u ON c.id = u.cafe_id
@@ -66,10 +73,8 @@ router.get('/stats', async (req, res) => {
 router.get('/cafes', async (req, res) => {
     try {
         const db = await getDb();
-        const cafes = db.prepare(`
-            SELECT c.*, u.name as owner_name, u.email as owner_email,
-                   (SELECT COUNT(*) FROM categories WHERE cafe_id = c.id) as category_count,
-                   (SELECT COUNT(*) FROM menu_items WHERE cafe_id = c.id) as item_count
+        const cafes = await db.prepare(`
+            SELECT c.*, u.name as owner_name, u.email as owner_email
             FROM cafes c
             LEFT JOIN users u ON c.id = u.cafe_id
             ORDER BY c.created_at DESC
@@ -86,7 +91,7 @@ router.get('/cafes', async (req, res) => {
 router.get('/owners', async (req, res) => {
     try {
         const db = await getDb();
-        const owners = db.prepare(`
+        const owners = await db.prepare(`
             SELECT u.id, u.email, u.name, u.is_active, u.created_at,
                    c.id as cafe_id, c.name as cafe_name, c.slug as cafe_slug
             FROM users u
@@ -114,7 +119,7 @@ router.post('/owners', async (req, res) => {
         const db = await getDb();
         
         // Check if email exists
-        const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+        const existing = await db.prepare('SELECT id FROM users WHERE email = ?').get(email);
         if (existing) {
             return res.status(400).json({ error: 'Email already registered' });
         }
@@ -123,18 +128,18 @@ router.post('/owners', async (req, res) => {
         const userPassword = password || uuidv4().slice(0, 8);
         const hashedPassword = await bcrypt.hash(userPassword, 10);
         
-        const result = db.prepare(`
+        const result = await db.prepare(`
             INSERT INTO users (email, password, name, role, cafe_id)
             VALUES (?, ?, ?, 'owner', ?)
         `).run(email, hashedPassword, name, cafeId || null);
         
         // Update cafe if provided
         if (cafeId) {
-            db.prepare('UPDATE cafes SET updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(cafeId);
+            await db.prepare('UPDATE cafes SET updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(cafeId);
         }
         
         // Log activity
-        db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)')
+        await db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)')
             .run(req.user.id, 'create_owner', `Created owner: ${email}`);
         
         res.json({
@@ -165,10 +170,10 @@ router.put('/owners/:id', async (req, res) => {
         if (resetPassword) {
             newPassword = uuidv4().slice(0, 8);
             const hashedPassword = await bcrypt.hash(newPassword, 10);
-            db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, id);
+            await db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, id);
         }
         
-        db.prepare(`
+        await db.prepare(`
             UPDATE users SET 
                 email = COALESCE(?, email),
                 name = COALESCE(?, name),
@@ -195,7 +200,7 @@ router.delete('/owners/:id', async (req, res) => {
         const { id } = req.params;
         const db = await getDb();
         
-        db.prepare('DELETE FROM users WHERE id = ? AND role = ?').run(id, 'owner');
+        await db.prepare('DELETE FROM users WHERE id = ? AND role = ?').run(id, 'owner');
         
         res.json({ success: true, message: 'Owner deleted' });
     } catch (error) {
@@ -210,7 +215,7 @@ router.get('/activity', async (req, res) => {
         const db = await getDb();
         const limit = req.query.limit || 50;
         
-        const activity = db.prepare(`
+        const activity = await db.prepare(`
             SELECT al.*, u.name as user_name, c.name as cafe_name
             FROM activity_log al
             LEFT JOIN users u ON al.user_id = u.id
