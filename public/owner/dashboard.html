@@ -977,7 +977,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Currency Symbol</label>
-                                <input type="text" id="settingCurrency" placeholder="$" maxlength="3">
+                                <input type="text" id="settingCurrency" placeholder="₹" maxlength="3">
                             </div>
                             <div class="form-group">
                                 <label>Status</label>
@@ -1372,7 +1372,7 @@
             if (item.is_vegan) badges.push('<span class="badge badge-vegan">🌱 Vegan</span>');
             if (item.is_spicy) badges.push('<span class="badge badge-spicy">🌶️ Spicy</span>');
             
-            const currency = cafeData?.currency || '$';
+            const currency = cafeData?.currency || '₹';
             
             return `
                 <div class="menu-item-card ${item.is_available ? '' : 'unavailable'}">
@@ -1421,7 +1421,7 @@
             document.getElementById('settingPhone').value = cafeData.phone || '';
             document.getElementById('settingEmail').value = cafeData.email || '';
             document.getElementById('settingAddress').value = cafeData.address || '';
-            document.getElementById('settingCurrency').value = cafeData.currency || '$';
+            document.getElementById('settingCurrency').value = cafeData.currency || '₹';
             document.getElementById('settingStatus').value = cafeData.is_published ? '1' : '0';
         }
         

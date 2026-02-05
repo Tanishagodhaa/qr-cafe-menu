@@ -21,7 +21,7 @@ class MenuGenerator {
             text: cafe.text_color || '#4A4A4A'
         };
         
-        const currency = cafe.currency || '$';
+        const currency = cafe.currency || '₹';
         
         return `<!DOCTYPE html>
 <html lang="en">
