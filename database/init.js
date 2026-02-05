@@ -21,7 +21,15 @@ async function getDb() {
     if (db) return db;
     
     if (!SQL) {
-        SQL = await initSqlJs();
+        // On Vercel, load WASM from CDN since local file isn't accessible
+        // Locally, use the default bundled WASM
+        if (isVercel) {
+            SQL = await initSqlJs({
+                locateFile: file => `https://sql.js.org/dist/${file}`
+            });
+        } else {
+            SQL = await initSqlJs();
+        }
     }
     
     // On Vercel: use in-memory database
