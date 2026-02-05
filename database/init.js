@@ -58,7 +58,7 @@ async function initializeDatabase() {
             google_link TEXT,
             instagram TEXT,
             facebook TEXT,
-            currency TEXT DEFAULT '$',
+            currency TEXT DEFAULT '₹',
             primary_color TEXT DEFAULT '#2C5F2D',
             secondary_color TEXT DEFAULT '#97BC62',
             accent_color TEXT DEFAULT '#DAA520',

@@ -52,25 +52,25 @@ function getSampleCafeMenu() {
             name: 'Hot Drinks',
             icon: '☕',
             items: [
-                { name: 'Espresso', description: 'Rich and bold', price: 3.50 },
-                { name: 'Cappuccino', description: 'With steamed milk foam', price: 4.50 },
-                { name: 'Latte', description: 'Smooth and creamy', price: 4.50 }
+                { name: 'Espresso', description: 'Rich and bold', price: 150 },
+                { name: 'Cappuccino', description: 'With steamed milk foam', price: 180 },
+                { name: 'Latte', description: 'Smooth and creamy', price: 200 }
             ]
         },
         {
             name: 'Cold Drinks',
             icon: '🧊',
             items: [
-                { name: 'Iced Coffee', description: 'Refreshing cold brew', price: 4.00 },
-                { name: 'Iced Latte', description: 'Cold and creamy', price: 5.00 }
+                { name: 'Iced Coffee', description: 'Refreshing cold brew', price: 180 },
+                { name: 'Iced Latte', description: 'Cold and creamy', price: 220 }
             ]
         },
         {
             name: 'Pastries',
             icon: '🥐',
             items: [
-                { name: 'Croissant', description: 'Buttery and flaky', price: 3.00 },
-                { name: 'Muffin', description: 'Fresh baked daily', price: 3.50 }
+                { name: 'Croissant', description: 'Buttery and flaky', price: 120 },
+                { name: 'Muffin', description: 'Fresh baked daily', price: 100 }
             ]
         }
     ];
@@ -237,7 +237,7 @@ router.post('/manual', requireAdmin, upload.single('logo'), async (req, res) => 
         const result = await db.prepare(`
             INSERT INTO cafes (name, slug, tagline, description, phone, email, address, currency, logo, created_by)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(name, slug, tagline || '', description || '', phone || '', email || '', address || '', currency || '$', logo, req.user.id);
+        `).run(name, slug, tagline || '', description || '', phone || '', email || '', address || '', currency || '₹', logo, req.user.id);
         
         const cafeId = result.lastInsertRowid;
         
