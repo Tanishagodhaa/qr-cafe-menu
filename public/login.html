@@ -369,25 +369,42 @@
             }
         });
         
-        // Check if already logged in
-        const token = localStorage.getItem('token');
-        const user = localStorage.getItem('user');
-        
-        if (token && user) {
-            try {
-                const userData = JSON.parse(user);
-                // Redirect to appropriate dashboard
-                if (userData.role === 'admin') {
-                    window.location.href = '/admin/dashboard.html';
-                } else {
-                    window.location.href = '/owner/dashboard.html';
+        // Check if already logged in - but validate token first
+        async function checkExistingLogin() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (token && user) {
+                try {
+                    // Validate token with server
+                    const response = await fetch(`${API_BASE}/auth/me`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const userData = JSON.parse(user);
+                        // Redirect to appropriate dashboard
+                        if (userData.role === 'admin') {
+                            window.location.href = '/admin/dashboard.html';
+                        } else {
+                            window.location.href = '/owner/dashboard.html';
+                        }
+                    } else {
+                        // Token invalid, clear storage
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                    }
+                } catch (e) {
+                    // Invalid user data or network error, clear storage
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
                 }
-            } catch (e) {
-                // Invalid user data, clear storage
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
             }
         }
+        
+        checkExistingLogin();
     </script>
 </body>
 </html>
