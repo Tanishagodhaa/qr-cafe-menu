@@ -10,7 +10,6 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -33,6 +32,36 @@ if (!isVercel) {
         }
     });
 }
+
+// Database initialization - must happen BEFORE routes are used
+const { initializeDatabase } = require('./database/init');
+let dbInitialized = false;
+let dbInitPromise = null;
+
+async function ensureDbReady() {
+    if (dbInitialized) return;
+    if (!dbInitPromise) {
+        dbInitPromise = initializeDatabase().then(() => {
+            dbInitialized = true;
+            console.log('✅ Database initialized');
+        }).catch(err => {
+            console.error('❌ Database init failed:', err);
+            throw err;
+        });
+    }
+    await dbInitPromise;
+}
+
+// Middleware to ensure DB is ready BEFORE any API calls
+app.use('/api', async (req, res, next) => {
+    try {
+        await ensureDbReady();
+        next();
+    } catch (err) {
+        console.error('DB init error in middleware:', err);
+        res.status(500).json({ error: 'Database initialization failed', details: err.message });
+    }
+});
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -84,11 +113,26 @@ app.get('/m/:slug', (req, res) => {
     res.redirect(`/menu/${req.params.slug}`);
 });
 
-// Initialize database and start server
-const { initializeDatabase } = require('./database/init');
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Server error:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
+});
 
-initializeDatabase()
-    .then(() => {
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        dbReady: dbInitialized, 
+        isVercel,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// For local development: start server
+if (!isVercel) {
+    const PORT = process.env.PORT || 3000;
+    ensureDbReady().then(() => {
         app.listen(PORT, () => {
             console.log(`
 ╔══════════════════════════════════════════════════════════════════╗
@@ -101,15 +145,14 @@ initializeDatabase()
 ║   📊 Admin Panel:  http://localhost:${PORT}/admin                  ║
 ║   🏪 Owner Panel:  http://localhost:${PORT}/owner                  ║
 ║                                                                  ║
-║   Default Admin: admin@qrmenu.com / admin123                     ║
-║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
             `);
         });
-    })
-    .catch(err => {
-        console.error('Failed to initialize database:', err);
+    }).catch(err => {
+        console.error('Failed to initialize:', err);
         process.exit(1);
     });
+}
 
+// Export for Vercel serverless
 module.exports = app;
